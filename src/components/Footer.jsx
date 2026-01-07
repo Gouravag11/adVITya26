@@ -1,7 +1,7 @@
 function Footer() {
   return (
-    <footer className="border-1 border-gray-400 text-center min-h-[80px]">
-        Footer
+    <footer className="bg-[#060009] flex justify-center text-lg items-center text-center text-white min-h-[80px]">
+      Advitya @ 2026. All rights reserved.
     </footer>
   );
 }
