@@ -1,9 +1,10 @@
+/* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
 
 const HeroSection = () => {
     return (
         <>
-            <div className="relative w-full h-[400px] sm:min-h-[720px] overflow-hidden bg-white">
+            <div className="relative w-full h-100 sm:min-h-180 overflow-hidden bg-white">
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -23,7 +24,7 @@ const HeroSection = () => {
                 </motion.div>
 
                 <div className="relative z-10 w-full h-full flex flex-col items-center justify-end pb-0">
-                    <div className="absolute top-[150px] sm:top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-full max-w-4xl px-4 z-20">
+                    <div className="absolute top-37.5 sm:top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] sm:w-full max-w-4xl px-4 z-20">
                         <img
                             src="/AdvityaTitle.png"
                             alt="AdVITya 2024"
@@ -37,7 +38,7 @@ const HeroSection = () => {
                             initial={{ opacity: 0, y: 100 }}
                             animate={{ opacity: 1, y: 10 }}
                             transition={{ duration: 0.5, delay: 1, ease: "easeOut" }}
-                            className="absolute bottom-0 left-[15%] sm:left-[8%] lg:left-[20%] h-56 sm:h-[450px] md:h-[500px] z-30 transform"
+                            className="absolute bottom-0 left-[15%] sm:left-[8%] lg:left-[20%] h-56 sm:h-112.5 md:h-125 z-30 transform"
                         >
                             <img
                                 src="/Mohit.png"
@@ -50,7 +51,7 @@ const HeroSection = () => {
                             initial={{ opacity: 0, y: 100 }}
                             animate={{ opacity: 1, y: 10 }}
                             transition={{ duration: 0.5, delay: 1.2, ease: "easeOut" }}
-                            className="absolute bottom-0 right-[5%] sm:right-[0%] md:right-[5%] lg:right-[17%] h-56 sm:h-[450px] md:h-[500px] z-30 transform"
+                            className="absolute bottom-0 right-[5%] sm:right-[0%] md:right-[5%] lg:right-[17%] h-56 sm:h-112.5 md:h-125 z-30 transform"
                         >
                             <img
                                 src="/Raghu.png"
@@ -63,7 +64,7 @@ const HeroSection = () => {
                             initial={{ opacity: 0, y: 100 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: 1.4, ease: "easeOut" }}
-                            className="absolute bottom-0 w-full flex justify-center h-56 sm:h-[500px] md:h-[550px] z-40"
+                            className="absolute bottom-0 w-full flex justify-center h-56 sm:h-125 md:h-137.5 z-40"
                         >
                             <img
                                 src="/Sunidhi.png"
@@ -75,7 +76,7 @@ const HeroSection = () => {
                 </div>
             </div>
             <div className="w-full pointer-events-none">
-                <div className="absolute z-30 left-0 top-[300px] sm:top-[550px] md:top-[530px] lg:top-[450px] xl:top-[360px] w-full">
+                <div className="absolute z-30 left-0 top-75 sm:top-137.5 md:top-132.5 lg:top-112.5 xl:top-90 w-full">
                     <svg
                         viewBox="0 0 1440 600"
                         className="hidden sm:block w-full h-full"
@@ -101,7 +102,7 @@ const HeroSection = () => {
                 </div>
             </div>
             <div className="w-full h-full">
-                <div className="absolute z-20 min-h-screen top-[300px] sm:top-[550px] md:top-[530px] lg:top-[450px] xl:top-[350px] left-0 w-full -z-10">
+                <div className="absolute z-20 min-h-screen top-75 sm:top-137.5 md:top-132.5 lg:top-112.5 xl:top-87.5 left-0 w-full">
                     <svg
                         viewBox="0 0 1440 1800"
                         className="hidden md:block w-full h-full"

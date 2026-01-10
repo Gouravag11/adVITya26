@@ -1,13 +1,33 @@
+/* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
+import { useState, useEffect } from "react";
 
 const AboutSection = () => {
+    const [isInAboutSection, setIsInAboutSection] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            const section = document.getElementById("about");
+            if (!section) return;
+
+            const visible =
+                window.scrollY >
+                section.offsetTop - (window.innerHeight * 3) / 4;
+
+            setIsInAboutSection(visible);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        handleScroll();
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     return (
-        <div className="w-full h-full min-h-[600px] sm:min-h-screen relative flex justify-center items-center z-30">
+        <div className="w-full h-full min-h-150 sm:min-h-screen relative flex justify-center items-center z-30">
             <div className="container mx-auto max-w-4xl px-4 text-white/60 text-center">
                 <motion.p
                     initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
+                    animate={isInAboutSection ? { opacity: 1, y: 0, scale: 1.1 } : { opacity: 0.8, y: 30, scale: 0.8 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="mb-12 px-2 font-normal text-sm sm:text-lg leading-relaxed tracking-normal text-center align-middle"
                 >
@@ -28,9 +48,8 @@ const AboutSection = () => {
             </div>
 
             <motion.div
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 0.2 }}
-                viewport={{ once: true }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInAboutSection ? { opacity: 0.2, y: 0, scale: 1.1 } : { opacity: 0, y: 30, scale: 0.8 }}
                 transition={{ duration: 1.2, delay: 0.5 }}
                 className="absolute left-1/2 bottom-0 -translate-x-1/2 w-full max-w-2xl pointer-events-none"
             >

@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+/* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
