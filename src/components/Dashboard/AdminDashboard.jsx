@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import { databases } from '@/lib/appwrite';
 import { ID, Query } from 'appwrite';
@@ -16,6 +18,7 @@ import {
 
 import { useAuth } from '@/contexts/AuthContext';
 import { uploadImageFile, transformGoogleDriveUrl } from '@/lib/storage';
+import { useNotifications, NotificationItem } from './Notification';
 
 const COLORS = ['#CDB7D9', '#9F87C4', '#765BA0', '#4E317D', '#280338'];
 
@@ -27,9 +30,11 @@ export default function AdminDashboard() {
   const [clubs, setClubs] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingText, setLoadingText] = useState('');
   const [registrations, setRegistrations] = useState([]);
   const [events, setEvents] = useState([]);
   const [pendingReviews, setPendingReviews] = useState([]);
+  const { notifications, addNotification, dismissNotification } = useNotifications();
 
   // Upload States (Processing)
   const [isSubmittingClub, setIsSubmittingClub] = useState(false);
@@ -77,6 +82,7 @@ export default function AdminDashboard() {
   const PENDING_EVENTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PENDING_EVENTS_COLLECTION_ID;
 
   const fetchData = async () => {
+    setLoadingText("Fetching Data...");
     setLoading(true);
     try {
       const [clubsRes, usersRes, registrationsRes, eventsRes, pendingRes] = await Promise.all([
@@ -110,6 +116,7 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
+      setLoadingText("");
       setLoading(false);
     }
   };
@@ -138,6 +145,8 @@ export default function AdminDashboard() {
   const handleAddClub = async (e) => {
     e.preventDefault();
     setIsSubmittingClub(true);
+    setLoadingText("Creating Club...");
+    setLoading(true);
     try {
       let finalLogoUrl = newClub.logoUrl;
 
@@ -156,24 +165,40 @@ export default function AdminDashboard() {
           category: newClub.category,
           description: newClub.description || '',
           logo: finalLogoUrl || '',
-          createdAt: new Date().toISOString(),
+          // createdAt: new Date().toISOString(), // YE KISI KE DATABASE ME TO PROBLEM KAR RAHA HAI
         }
       );
       setNewClub({ name: '', category: 'technical', description: '', logoFile: null, logoPreview: '', logoUrl: '' });
       setShowAddClub(false);
-      alert('Club added successfully!');
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Club Added Successfully!',
+      });
       fetchData();
     } catch (error) {
       console.error('Error adding club:', error);
-      alert('Error adding club: ' + error.message);
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Adding Club!',
+      });
     } finally {
       setIsSubmittingClub(false);
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
   // --- User Management ---
   const handlePromoteToCoordinator = async (userId, currentRole) => {
-    if (currentRole === 'coordinator') return;
+    setLoadingText("Promoting Member...");
+    setLoading(true);
+    if (currentRole === 'coordinator') {
+      setLoadingText("");
+      setLoading(false);
+      return;
+    };
     try {
       await databases.updateDocument(
         DATABASE_ID,
@@ -181,15 +206,28 @@ export default function AdminDashboard() {
         userId,
         { role: 'coordinator' }
       );
-      alert('User promoted successfully!');
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'User Promoted Successfully!',
+      });
       fetchData();
     } catch (error) {
       console.error('Error promoting user:', error);
-      alert('Error promoting user');
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Promoting User!',
+      })
+    } finally {
+      setLoadingText("");
+    setLoading(false);
     }
   };
 
   const handleAssignClub = async (userId, clubName) => {
+    setLoadingText("Assigning Club...");
+    setLoading(true);
     try {
       await databases.updateDocument(
         DATABASE_ID,
@@ -197,11 +235,22 @@ export default function AdminDashboard() {
         userId,
         { clubName: clubName }
       );
-      alert('Club assigned successfully!');
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Club Assigned Successfully!',
+      });
       fetchData();
     } catch (error) {
       console.error('Error assigning club:', error);
-      alert('Error assigning club');
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Assigning Club!',
+      });
+    } finally{
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
@@ -225,12 +274,26 @@ export default function AdminDashboard() {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    setLoadingText("Creating Event...");
+    setLoading(true);
     if (!newEvent.clubId) {
-      alert("Please select a club");
+      addNotification({
+        id: Date.now(),
+        type: 'warning',
+        message: 'Please Select a Club!',
+      });
+      setLoadingText("");
+      setLoading(false);
       return;
     }
     if (newEvent.registrationMethod === 'internal' && formFields.length === 0) {
-      alert('Please add at least one form field for internal registration');
+      addNotification({
+        id: Date.now(),
+        type: 'warning',
+        message: 'Add at Least One Form Field!',
+      });
+      setLoadingText("");
+      setLoading(false);
       return;
     }
 
@@ -256,7 +319,11 @@ export default function AdminDashboard() {
           formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
         }
       );
-      alert('Event created successfully!');
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Event Created Successfully!',
+      });
       setShowAddEvent(false);
       setNewEvent({
         clubId: '', eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: 0,
@@ -266,54 +333,135 @@ export default function AdminDashboard() {
       fetchData();
     } catch (error) {
       console.error("Error creating event:", error);
-      alert("Error creating event: " + error.message);
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Creating Event!',
+      });
     } finally {
       setIsSubmittingEvent(false);
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
   // --- Review Logic ---
   const handleApproveReview = async (review) => {
+    setLoadingText("Approving...");
+    setLoading(true);
     try {
+      console.log(review)
       const changes = JSON.parse(review.proposedChanges);
+      const eventId = review.originalEventId;
 
-      // Update the actual event
-      await databases.updateDocument(
-        DATABASE_ID,
-        EVENTS_COLLECTION_ID,
-        review.originalEventId,
-        {
-          name: changes.name,
-          poster: changes.poster,
-          registrationFee: changes.registrationFee,
-          registrationMethod: changes.registrationMethod,
-          registrationLink: changes.registrationLink,
-          formFields: changes.formFields
+      let eventExists = true;
+
+      // 1️⃣ Check if event exists
+      try {
+        await databases.getDocument(
+          DATABASE_ID,
+          EVENTS_COLLECTION_ID,
+          eventId
+        );
+      } catch (err) {
+        if (err.code === 404) {
+          eventExists = false;
+        } else {
+          throw err;
         }
+      }
+
+      // 2️⃣ Update if exists, else create new
+      if (eventExists) {
+        await databases.updateDocument(
+          DATABASE_ID,
+          EVENTS_COLLECTION_ID,
+          eventId,
+          {
+            name: changes.name,
+            poster: changes.poster,
+            registrationFee: changes.registrationFee,
+            registrationMethod: changes.registrationMethod,
+            registrationLink: changes.registrationMethod === 'external'
+              ? changes.registrationLink
+              : null,
+            formFields: changes.registrationMethod === 'internal'
+              ? changes.formFields
+              : null
+          }
+        );
+      } else {
+        await databases.createDocument(
+          DATABASE_ID,
+          EVENTS_COLLECTION_ID,
+          eventId, // Use originalEventId
+          {
+            clubId: review.clubId,
+            name: changes.name,
+            poster: changes.poster,
+            registrationFee: changes.registrationFee,
+            registrationMethod: changes.registrationMethod,
+            registrationLink: changes.registrationMethod === 'external'
+              ? changes.registrationLink
+              : null,
+            formFields: changes.registrationMethod === 'internal'
+              ? changes.formFields
+              : null,
+          }
+        );
+      }
+
+      // 3️⃣ Delete pending review
+      await databases.deleteDocument(
+        DATABASE_ID,
+        PENDING_EVENTS_COLLECTION_ID,
+        review.$id
       );
 
-      // Delete the pending review
-      await databases.deleteDocument(DATABASE_ID, PENDING_EVENTS_COLLECTION_ID, review.$id);
-
-      alert("Changes approved and applied!");
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Changes Approved and Applied!',
+      });
       setSelectedReview(null);
       fetchData();
+
     } catch (error) {
       console.error("Error approving review:", error);
-      alert("Error approving changes");
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Approving Changes!',
+      });
+    } finally {
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
   const handleRejectReview = async (reviewId) => {
     if (!confirm("Are you sure you want to reject and delete this request?")) return;
+    setLoadingText("Rejecting...");
+    setLoading(true);
     try {
       await databases.deleteDocument(DATABASE_ID, PENDING_EVENTS_COLLECTION_ID, reviewId);
-      alert("Request rejected.");
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Request Rejected!',
+      });
       setSelectedReview(null);
       fetchData();
     } catch (error) {
       console.error("Error rejecting review:", error);
-      alert("Error rejecting request");
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Rejecting Request!',
+      });
+    } finally {
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
@@ -373,8 +521,9 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0F0518]">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F0518]">
         <FontAwesomeIcon icon={faSpinner} spin className="text-6xl text-[#CDB7D9]" />
+        <span className='text-white font-medium mt-2'>{loadingText}</span>
       </div>
     );
   }
@@ -401,7 +550,7 @@ export default function AdminDashboard() {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex items-center gap-3 pl-2"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#CDB7D9] to-[#4E317D] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#CDB7D9] to-[#4E317D] flex items-center justify-center">
                   <span className="font-medium text-[#1A0B2E] text-xs">AD</span>
                 </div>
                 <h1 className="text-xl font-medium text-[#CDB7D9] tracking-wider">ADMIN</h1>
@@ -426,7 +575,7 @@ export default function AdminDashboard() {
               key={item.id}
               onClick={() => { setActiveTab(item.id); setShowAddClub(false); setShowAddEvent(false); }}
               className={`flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 font-medium group cursor-pointer ${activeTab === item.id
-                ? 'bg-gradient-to-r from-[#CDB7D9]/20 to-transparent text-[#CDB7D9]'
+                ? 'bg-linear-to-r from-[#CDB7D9]/20 to-transparent text-[#CDB7D9]'
                 : 'text-[#CDB7D9]/50 hover:text-[#CDB7D9] hover:bg-[#CDB7D9]/5'
                 }`}
             >
@@ -479,14 +628,14 @@ export default function AdminDashboard() {
                     { label: 'Pending Reviews', value: pendingReviews.length, icon: faClipboardCheck, color: 'text-yellow-400' },
                   ].map((stat, idx) => (
                     <div key={idx} className="relative group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#CDB7D9]/5 to-transparent rounded-3xl blur-xl group-hover:opacity-100 opacity-50 transition-opacity"></div>
+                      <div className="absolute inset-0 bg-linear-to-r from-[#CDB7D9]/5 to-transparent rounded-3xl blur-xl group-hover:opacity-100 opacity-50 transition-opacity"></div>
                       <div className="relative flex items-center gap-6 p-4">
                         <div className={`text-4xl font-light ${stat.color} drop-shadow-[0_0_10px_rgba(255,255,255,0.1)]`}>
                           {stat.value}
                         </div>
                         <div>
                           <h3 className="text-[#CDB7D9]/60 uppercase text-xs font-normal tracking-widest mb-1">{stat.label}</h3>
-                          <div className="h-1 w-12 bg-gradient-to-r from-[#CDB7D9]/50 to-transparent rounded-full"></div>
+                          <div className="h-1 w-12 bg-linear-to-r from-[#CDB7D9]/50 to-transparent rounded-full"></div>
                         </div>
                       </div>
                     </div>
@@ -500,7 +649,7 @@ export default function AdminDashboard() {
                       <span className="w-2 h-2 rounded-full bg-pink-500"></span>
                       Top Performing Clubs
                     </h3>
-                    <div className="h-[400px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#CDB7D9]/20 scrollbar-track-transparent space-y-3">
+                    <div className="h-100 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#CDB7D9]/20 scrollbar-track-transparent space-y-3">
                       {getTopClubsData().map((club, index) => (
                         <div key={index} className="flex items-center gap-4 p-4 bg-[#B7C9D9]/5 backdrop-blur-sm border border-[#CDB7D9]/10 rounded-2xl hover:bg-[#CDB7D9]/10 transition-all group">
                           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
@@ -529,7 +678,7 @@ export default function AdminDashboard() {
                       <span className="w-2 h-2 rounded-full bg-purple-500"></span>
                       Categories
                     </h3>
-                    <div className="h-[400px] w-full relative flex items-center justify-center">
+                    <div className="h-100 w-full relative flex items-center justify-center">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
@@ -570,7 +719,7 @@ export default function AdminDashboard() {
                     ) : (
                       <div className="grid gap-4">
                         {pendingReviews.map(review => (
-                          <div key={review.$id} className="p-6 bg-[#000]/20 rounded-xl border border-[#CDB7D9]/10 flex justify-between items-center group hover:border-[#CDB7D9]/30 transition-all">
+                          <div key={review.$id} className="p-6 bg-black/20 rounded-xl border border-[#CDB7D9]/10 flex justify-between items-center group hover:border-[#CDB7D9]/30 transition-all">
                             <div>
                               <h4 className="text-white text-lg font-medium mb-1">Update Request: {review.eventName}</h4>
                               <p className="text-[#CDB7D9]/50 text-sm">Requested by: {review.coordinatorName} (Club ID: {review.clubId})</p>
@@ -641,7 +790,7 @@ export default function AdminDashboard() {
                       <select
                         value={eventClubFilter}
                         onChange={(e) => setEventClubFilter(e.target.value)}
-                        className="px-6 py-2 bg-[#000]/20 text-[#CDB7D9] rounded-xl border border-[#CDB7D9]/20 outline-none"
+                        className="px-6 py-2 bg-black/20 text-[#CDB7D9] rounded-xl border border-[#CDB7D9]/20 outline-none"
                       >
                         <option value="all">All Clubs</option>
                         {clubs.map(c => <option key={c.$id} value={c.name}>{c.name}</option>)}
@@ -697,7 +846,7 @@ export default function AdminDashboard() {
                               required
                               value={newEvent.clubId}
                               onChange={(e) => setNewEvent({ ...newEvent, clubId: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             >
                               <option value="" className="bg-[#1A0B2E]">Select Club</option>
                               {clubs.map(c => <option key={c.$id} value={c.$id} className="bg-[#1A0B2E]">{c.name}</option>)}
@@ -709,7 +858,7 @@ export default function AdminDashboard() {
                               type="text" required
                               value={newEvent.eventName}
                               onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             />
                           </div>
                         </div>
@@ -726,7 +875,7 @@ export default function AdminDashboard() {
                                   className="hidden"
                                   id="poster-upload"
                                 />
-                                <label htmlFor="poster-upload" className="flex items-center justify-center w-full px-4 py-4 bg-[#000]/20 border border-dashed border-[#CDB7D9]/30 rounded-2xl cursor-pointer hover:bg-[#CDB7D9]/5 transition-all text-[#CDB7D9]/70 gap-2">
+                                <label htmlFor="poster-upload" className="flex items-center justify-center w-full px-4 py-4 bg-black/20 border border-dashed border-[#CDB7D9]/30 rounded-2xl cursor-pointer hover:bg-[#CDB7D9]/5 transition-all text-[#CDB7D9]/70 gap-2">
                                   {isSubmittingEvent ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faUpload} />}
                                   <span>{newEvent.posterPreview ? 'Change Poster' : 'Click to Upload'}</span>
                                 </label>
@@ -741,7 +890,7 @@ export default function AdminDashboard() {
                                   placeholder="Or paste URL"
                                   value={newEvent.posterUrl}
                                   onChange={(e) => setNewEvent({ ...newEvent, posterUrl: e.target.value })}
-                                  className="w-full px-4 py-2 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-xl focus:border-[#CDB7D9] outline-none text-sm"
+                                  className="w-full px-4 py-2 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-xl focus:border-[#CDB7D9] outline-none text-sm"
                                 />
                               )}
                             </div>
@@ -752,7 +901,7 @@ export default function AdminDashboard() {
                               type="number" min="0"
                               value={newEvent.registrationFee}
                               onChange={(e) => setNewEvent({ ...newEvent, registrationFee: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             />
                           </div>
                         </div>
@@ -762,7 +911,7 @@ export default function AdminDashboard() {
                           <select
                             value={newEvent.registrationMethod}
                             onChange={(e) => setNewEvent({ ...newEvent, registrationMethod: e.target.value })}
-                            className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                           >
                             <option value="internal" className="bg-[#1A0B2E]">Internal Form</option>
                             <option value="external" className="bg-[#1A0B2E]">External Link</option>
@@ -776,11 +925,11 @@ export default function AdminDashboard() {
                               type="url" required
                               value={newEvent.registrationLink}
                               onChange={(e) => setNewEvent({ ...newEvent, registrationLink: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             />
                           </div>
                         ) : (
-                          <div className="p-6 bg-[#000]/20 rounded-2xl border border-[#CDB7D9]/10">
+                          <div className="p-6 bg-black/20 rounded-2xl border border-[#CDB7D9]/10">
                             <div className="flex justify-between items-center mb-4">
                               <h4 className="text-white font-medium">Form Fields</h4>
                               <button type="button" onClick={addFormField} className="text-xs bg-[#CDB7D9]/10 hover:bg-[#CDB7D9] hover:text-[#280338] px-3 py-1 rounded-lg transition-colors text-[#CDB7D9]">Add Field</button>
@@ -847,7 +996,7 @@ export default function AdminDashboard() {
 
                       <button
                         onClick={() => setShowAddClub(true)}
-                        className="px-8 py-3 bg-gradient-to-r from-[#CDB7D9] to-[#9F87C4] text-[#280338] rounded-full cursor-pointer font-bold flex items-center gap-3 hover:-translate-y-1"
+                        className="px-8 py-3 bg-linear-to-r from-[#CDB7D9] to-[#9F87C4] text-[#280338] rounded-full cursor-pointer font-bold flex items-center gap-3 hover:-translate-y-1"
                       >
                         <FontAwesomeIcon icon={faPlus} /> Create New
                       </button>
@@ -859,7 +1008,7 @@ export default function AdminDashboard() {
                         .map((club) => (
                           <div key={club.$id} className="group relative overflow-hidden bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-2xl p-6 hover:bg-[#CDB7D9]/10 transition-all flex items-center justify-between">
                             <div className="flex items-center gap-6">
-                              <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#CDB7D9]/10 to-[#1A0B2E]/50 flex items-center justify-center border border-[#CDB7D9]/20 group-hover:scale-105 transition-transform overflow-hidden relative">
+                              <div className="w-16 h-16 rounded-xl bg-linear-to-br from-[#CDB7D9]/10 to-[#1A0B2E]/50 flex items-center justify-center border border-[#CDB7D9]/20 group-hover:scale-105 transition-transform overflow-hidden relative">
                                 {club.logo ? (
                                   <img src={club.logo} alt={club.name} className="w-full h-full object-cover" />
                                 ) : (
@@ -904,7 +1053,7 @@ export default function AdminDashboard() {
 
                     <div className="grid lg:grid-cols-5 gap-8">
                       <div className="lg:col-span-2 order-first lg:order-last">
-                        <div className="bg-[#B7C9D9]/5 backdrop-blur-xl border border-[#CDB7D9]/20 rounded-3xl p-8 h-full min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-[#CDB7D9]/40 transition-colors cursor-pointer border-dashed">
+                        <div className="bg-[#B7C9D9]/5 backdrop-blur-xl border border-[#CDB7D9]/20 rounded-3xl p-8 h-full min-h-100 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-[#CDB7D9]/40 transition-colors cursor-pointer border-dashed">
                           <label className="cursor-pointer inset-0 absolute flex flex-col items-center justify-center">
                             <input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
                             {newClub.logoPreview ? (
@@ -915,11 +1064,11 @@ export default function AdminDashboard() {
                                   <FontAwesomeIcon icon={faPlus} className="text-3xl text-[#CDB7D9]/50 group-hover:text-[#CDB7D9]" />
                                 </div>
                                 <h4 className="text-xl text-white mb-2">Club Logo</h4>
-                                <p className="text-[#CDB7D9]/50 text-sm max-w-[200px]">Click to upload club logo</p>
+                                <p className="text-[#CDB7D9]/50 text-sm max-w-50">Click to upload club logo</p>
                               </>
                             )}
                           </label>
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#CDB7D9]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                          <div className="absolute inset-0 bg-linear-to-t from-[#CDB7D9]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                         </div>
                       </div>
 
@@ -932,10 +1081,10 @@ export default function AdminDashboard() {
                               required
                               value={newClub.name}
                               onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
-                              className="peer w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent"
+                              className="peer w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent"
                               placeholder="Club Name"
                             />
-                            <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
+                            <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
                               Club Name
                             </label>
                           </div>
@@ -944,7 +1093,7 @@ export default function AdminDashboard() {
                             <select
                               value={newClub.category}
                               onChange={(e) => setNewClub({ ...newClub, category: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none appearance-none cursor-pointer"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none appearance-none cursor-pointer"
                             >
                               <option value="technical" className="bg-[#1A0B2E]">Technical</option>
                               <option value="non-technical" className="bg-[#1A0B2E]">Non-Technical</option>
@@ -959,10 +1108,10 @@ export default function AdminDashboard() {
                             <textarea
                               value={newClub.description}
                               onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
-                              className="peer w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent h-40 resize-none"
+                              className="peer w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent h-40 resize-none"
                               placeholder="Description"
                             />
-                            <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:top-[-10px] peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
+                            <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
                               Description
                             </label>
                           </div>
@@ -987,7 +1136,7 @@ export default function AdminDashboard() {
                 className="bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-3xl overflow-hidden shadow-2xl"
               >
                 <div className="p-8 border-b border-[#CDB7D9]/10 grid md:grid-cols-3 gap-6">
-                  <div className="relative bg-[#000]/20 rounded-xl overflow-hidden">
+                  <div className="relative bg-black/20 rounded-xl overflow-hidden">
                     <FontAwesomeIcon icon={faSearch} className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#CDB7D9]/30" />
                     <input
                       type="text"
@@ -1000,7 +1149,7 @@ export default function AdminDashboard() {
                   <select
                     value={userRoleFilter}
                     onChange={(e) => setUserRoleFilter(e.target.value)}
-                    className="px-6 py-4 bg-[#000]/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer"
+                    className="px-6 py-4 bg-black/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer"
                   >
                     <option value="all" className="bg-[#1A0B2E]">All Roles</option>
                     <option value="member" className="bg-[#1A0B2E]">Member</option>
@@ -1010,7 +1159,7 @@ export default function AdminDashboard() {
                   <select
                     value={userClubFilter}
                     onChange={(e) => setUserClubFilter(e.target.value)}
-                    className="px-6 py-4 bg-[#000]/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer"
+                    className="px-6 py-4 bg-black/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer"
                   >
                     <option value="all" className="bg-[#1A0B2E]">All Clubs</option>
                     {clubs.map(c => <option key={c.$id} value={c.name} className="bg-[#1A0B2E]">{c.name}</option>)}
@@ -1062,9 +1211,9 @@ export default function AdminDashboard() {
                               <select
                                 value={user.clubName || ''}
                                 onChange={(e) => handleAssignClub(user.$id, e.target.value)}
-                                className="px-3 py-2 bg-[#000]/40 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg text-xs outline-none focus:border-[#CDB7D9] cursor-pointer"
+                                className="px-3 py-2 bg-black/40 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg text-xs outline-none focus:border-[#CDB7D9] cursor-pointer"
                               >
-                                <option value="" className="bg-[#1A0B2E]">Assign Club</option>
+                                <option value="" className="bg-[#1A0B2E]">(Assign Club)</option>
                                 {clubs.map(c => <option key={c.$id} value={c.name} className="bg-[#1A0B2E]">{c.name}</option>)}
                               </select>
                             )}
@@ -1109,6 +1258,12 @@ export default function AdminDashboard() {
 
           </AnimatePresence>
         </main>
+      </div>
+      {/* Notifications */}
+      <div className="fixed top-36 right-6 w-80 z-50 space-y-3">
+        {notifications.map(n => (
+          <NotificationItem key={n.id} notification={n} onDismiss={dismissNotification} />
+        ))}
       </div>
     </div>
   );

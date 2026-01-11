@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,11 +9,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSpinner, faPlus, faTrash, faEdit, faSearch, faChevronLeft, faChevronRight,
-  faCalendarAlt, faClipboardList, faTachometerAlt, faAngleDoubleLeft, faAngleDoubleRight,
+  faCalendarAlt, faClipboardList, faTachometerAlt, faTimes, faAngleDoubleLeft, faAngleDoubleRight,
   faPaperPlane, faUpload
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { uploadImageFile } from '@/lib/storage';
+import { useNotifications, NotificationItem } from './Notification';
 
 export default function CoordinatorDashboard({ clubName }) {
   const { userData } = useAuth();
@@ -19,10 +22,14 @@ export default function CoordinatorDashboard({ clubName }) {
   const [events, setEvents] = useState([]);
   const [allRegistrations, setAllRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingText, setLoadingText] = useState('');
+  const { notifications, addNotification, dismissNotification } = useNotifications();
 
   // UI State
   const [activeTab, setActiveTab] = useState('events');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
 
   // Edit/Suggest State
   const [showSuggestEdit, setShowSuggestEdit] = useState(false);
@@ -40,6 +47,7 @@ export default function CoordinatorDashboard({ clubName }) {
 
   // Upload State
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingClub, setIsSubmittingClub] = useState(false);
 
   // Registration Table State
   const [currentPage, setCurrentPage] = useState(1);
@@ -49,9 +57,20 @@ export default function CoordinatorDashboard({ clubName }) {
 
   const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
   const CLUBS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_CLUBS_COLLECTION_ID;
+  const USERS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_USERS_COLLECTION_ID;
   const EVENTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_EVENTS_COLLECTION_ID;
   const REGISTRATIONS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_REGISTRATIONS_COLLECTION_ID;
   const PENDING_EVENTS_COLLECTION_ID = import.meta.env.VITE_APPWRITE_PENDING_EVENTS_COLLECTION_ID;
+
+  // New Club State
+  const [newClub, setNewClub] = useState({
+    name: '',
+    category: 'technical',
+    description: '',
+    logoFile: null,      // The actual file object
+    logoPreview: '',     // The local preview URL
+    logoUrl: ''          // The fallback URL text input
+  });
 
   const fetchClubData = async () => {
     if (!userData?.clubName) {
@@ -59,6 +78,7 @@ export default function CoordinatorDashboard({ clubName }) {
       return;
     }
 
+    setLoadingText("Fetching Data...");
     setLoading(true);
     try {
       const clubRes = await databases.listDocuments(
@@ -68,6 +88,7 @@ export default function CoordinatorDashboard({ clubName }) {
       );
 
       if (clubRes.documents.length === 0) {
+        setLoadingText("");
         setLoading(false);
         return;
       }
@@ -101,14 +122,161 @@ export default function CoordinatorDashboard({ clubName }) {
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
+      setLoadingText("");
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchClubData();
-  }, [userData?.clubName]);
+  }, []);
 
+  // --- Upload Helpers (Deferred) ---
+  const handleLogoSelect = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const previewUrl = URL.createObjectURL(file);
+    setNewClub(prev => ({ ...prev, logoFile: file, logoPreview: previewUrl }));
+  };
+
+  // --- Club Management ---
+  const handleAddClub = async (e) => {
+    e.preventDefault();
+    setIsSubmittingClub(true);
+    setLoadingText("Adding Club...");
+    setLoading(true);
+    try {
+      let finalLogoUrl = newClub.logoUrl;
+
+      if (newClub.logoFile) {
+        finalLogoUrl = await uploadImageFile(newClub.logoFile);
+      }
+
+      console.log("DEBUG: Final Logo URL:", finalLogoUrl);
+
+      await databases.createDocument(
+        DATABASE_ID,
+        PENDING_EVENTS_COLLECTION_ID,
+        ID.unique(),
+        {
+          name: newClub.name,
+          category: newClub.category,
+          description: newClub.description || '',
+          logo: finalLogoUrl || '',
+          // createdAt: new Date().toISOString(),
+        }
+      );
+      await databases.updateDocument(
+        DATABASE_ID,
+        USERS_COLLECTION_ID,
+        userData.$id,
+        { clubName: newClub.name }
+      );
+      setNewClub({ name: '', category: 'technical', description: '', logoFile: null, logoPreview: '', logoUrl: '' });
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Club Added Successfully!',
+      });
+    } catch (error) {
+      console.error('Error adding club:', error);
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Adding Club!',
+      });
+    } finally {
+      fetchClubData();
+      setIsSubmittingClub(false);
+      setLoadingText("");
+      setLoading(false);
+    }
+  };
+
+
+  const handleCreateEvent = async (e) => {
+    e.preventDefault();
+    setLoadingText("Creating Event...");
+    setLoading(true);
+    if (!club.name) {
+      addNotification({
+        id: Date.now(),
+        type: 'warning',
+        message: 'Please Select a Club!',
+      });
+      setLoadingText("");
+      setLoading(false);
+      return;
+    }
+    if (newEvent.registrationMethod === 'internal' && formFields.length === 0) {
+      addNotification({
+        id: Date.now(),
+        type: 'warning',
+        message: 'Add at Least One Form Field!',
+      });
+      setLoadingText("");
+      setLoading(false);
+      return;
+    }
+
+    setIsSubmittingEvent(true);
+    try {
+      let finalPosterUrl = newEvent.posterUrl;
+
+      if (newEvent.posterFile) {
+        finalPosterUrl = await uploadImageFile(newEvent.posterFile);
+      }
+
+      const documentId = ID.unique();
+
+      const proposedChanges = {
+        name: newEvent.eventName,
+        poster: finalPosterUrl,
+        registrationFee: Number(newEvent.registrationFee),
+        registrationMethod: newEvent.registrationMethod,
+        registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
+        formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
+      }
+
+      await databases.createDocument(
+        DATABASE_ID,
+        PENDING_EVENTS_COLLECTION_ID,
+        documentId,
+        {
+          originalEventId: documentId,
+          clubId: club.$id,
+          proposedChanges: JSON.stringify(proposedChanges),
+          coordinatorId: userData.$id,
+          coordinatorName: userData.name,
+          eventName: newEvent.eventName,
+          status: 'pending'
+        }
+      );
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Event Created Successfully!',
+      });
+      setShowAddEvent(false);
+      setNewEvent({
+        clubId: '', eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: 0,
+        registrationMethod: 'internal', registrationLink: ''
+      });
+      setFormFields([]);
+      // fetchData();
+    } catch (error) {
+      console.error("Error creating event:", error);
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Creating Event!',
+      });
+    } finally {
+      setIsSubmittingEvent(false);
+      setLoadingText("");
+      setLoading(false);
+    }
+  };
 
   // --- Form Field Logic (for suggestions) ---
   const addFormField = () => {
@@ -145,7 +313,9 @@ export default function CoordinatorDashboard({ clubName }) {
     if (event.formFields) {
       try {
         parsedFields = typeof event.formFields === 'string' ? JSON.parse(event.formFields) : event.formFields;
-      } catch (e) { }
+      } catch (e) {
+        console.log(e);
+      }
     }
 
     setNewEvent({
@@ -163,9 +333,17 @@ export default function CoordinatorDashboard({ clubName }) {
 
   const handleSuggestEdit = async (e) => {
     e.preventDefault();
+    setLoadingText("Suggesting Edit...");
+    setLoading(true);
 
     if (newEvent.registrationMethod === 'internal' && formFields.length === 0) {
-      alert('Please add at least one form field for internal registration');
+      addNotification({
+        id: Date.now(),
+        type: 'warning',
+        message: 'Add at Least One Form Field!',
+      });
+      setLoadingText("");
+      setLoading(false);
       return;
     }
 
@@ -200,16 +378,26 @@ export default function CoordinatorDashboard({ clubName }) {
         }
       );
 
-      alert('Edit suggestion sent to Admin for review!');
+      addNotification({
+        id: Date.now(),
+        type: 'success',
+        message: 'Edit Suggestion sent to Admin for Review!',
+      });
       setShowSuggestEdit(false);
       setNewEvent({ eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: 0, registrationMethod: 'internal', registrationLink: '' });
       setFormFields([]);
       setSelectedEventId(null);
     } catch (error) {
       console.error('Error suggesting edit:', error);
-      alert('Error sending suggestion');
+      addNotification({
+        id: Date.now(),
+        type: 'error',
+        message: 'Error Sending Suggestion!',
+      });
     } finally {
       setIsSubmitting(false);
+      setLoadingText("");
+      setLoading(false);
     }
   };
 
@@ -229,20 +417,99 @@ export default function CoordinatorDashboard({ clubName }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0F0518]">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F0518]">
         <FontAwesomeIcon icon={faSpinner} spin className="text-6xl text-[#CDB7D9]" />
+        <span className='text-white font-medium mt-2'>{loadingText}</span>
       </div>
     );
   }
 
   if (!club) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0F0518] text-[#CDB7D9]">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold">No Club Assigned</h2>
-          <p className="opacity-50">Please contact an admin to assign you to a club.</p>
+      <>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-[#0F0518] text-[#CDB7D9] p-10">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold">Add Your Club</h2>
+          </div>
+
+          <div className='flex w-screen mt-8'>
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="w-full mx-auto px-10 md:px-20">
+              <div className="grid lg:grid-cols-5 gap-8">
+                <div className="lg:col-span-2 order-first lg:order-last">
+                  <div className="bg-[#B7C9D9]/5 backdrop-blur-xl border border-[#CDB7D9]/20 rounded-3xl p-8 h-full min-h-100 flex flex-col items-center justify-center text-center relative overflow-hidden group hover:border-[#CDB7D9]/40 transition-colors cursor-pointer border-dashed">
+                    <label className="cursor-pointer inset-0 absolute flex flex-col items-center justify-center">
+                      <input type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
+                      {newClub.logoPreview ? (
+                        <img src={newClub.logoPreview} className="w-full h-full object-cover" />
+                      ) : (
+                        <>
+                          <div className="w-24 h-24 rounded-full bg-[#CDB7D9]/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
+                            <FontAwesomeIcon icon={faPlus} className="text-3xl text-[#CDB7D9]/50 group-hover:text-[#CDB7D9]" />
+                          </div>
+                          <h4 className="text-xl text-white mb-2">Club Logo</h4>
+                          <p className="text-[#CDB7D9]/50 text-sm max-w-50">Click to upload club logo</p>
+                        </>
+                      )}
+                    </label>
+                    <div className="absolute inset-0 bg-linear-to-t from-[#CDB7D9]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleAddClub} className="lg:col-span-3 relative">
+                  <h3 className="text-3xl font-abril text-white mb-8">New Club Details</h3>
+                  <div className="space-y-6">
+                    <div className="relative group">
+                      <input
+                        type="text"
+                        required
+                        value={newClub.name}
+                        onChange={(e) => setNewClub({ ...newClub, name: e.target.value })}
+                        className="peer w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent"
+                        placeholder="Club Name"
+                      />
+                      <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
+                        Club Name
+                      </label>
+                    </div>
+
+                    <div className="relative group">
+                      <select
+                        value={newClub.category}
+                        onChange={(e) => setNewClub({ ...newClub, category: e.target.value })}
+                        className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none appearance-none cursor-pointer"
+                      >
+                        <option value="technical" className="bg-[#1A0B2E]">Technical</option>
+                        <option value="non-technical" className="bg-[#1A0B2E]">Non-Technical</option>
+                      </select>
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#CDB7D9]/50">
+                        <FontAwesomeIcon icon={faChevronRight} className="rotate-90" />
+                      </div>
+                    </div>
+
+                    <div className="relative group">
+                      <textarea
+                        value={newClub.description}
+                        onChange={(e) => setNewClub({ ...newClub, description: e.target.value })}
+                        className="peer w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] focus:outline-none transition-all placeholder-transparent h-40 resize-none"
+                        placeholder="Description"
+                      />
+                      <label className="absolute left-6 top-4 text-[#CDB7D9]/50 text-sm transition-all peer-placeholder-shown:text-base peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-[#CDB7D9] peer-focus:bg-[#1A0B2E] peer-focus:px-2 pointer-events-none">
+                        Description
+                      </label>
+                    </div>
+
+                    <button disabled={isSubmittingClub} type="submit" className="w-full py-4 bg-[#CDB7D9] text-[#280338] font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(205,183,217,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                      {isSubmittingClub ? <FontAwesomeIcon icon={faSpinner} spin className="mr-2" /> : null}
+                      {isSubmittingClub ? 'Adding...' : 'Add Club'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </>
+      
     );
   }
 
@@ -269,7 +536,7 @@ export default function CoordinatorDashboard({ clubName }) {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 className="flex items-center gap-3 pl-2"
               >
-                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#CDB7D9] to-[#4E317D] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-linear-to-tr from-[#CDB7D9] to-[#4E317D] flex items-center justify-center">
                   <span className="font-medium text-[#1A0B2E] text-xs">CO</span>
                 </div>
                 <h1 className="text-xl font-medium text-[#CDB7D9] tracking-wider">COORD</h1>
@@ -290,7 +557,7 @@ export default function CoordinatorDashboard({ clubName }) {
               key={item.id}
               onClick={() => { setActiveTab(item.id); setShowSuggestEdit(false); }}
               className={`flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 font-medium group cursor-pointer ${activeTab === item.id
-                ? 'bg-gradient-to-r from-[#CDB7D9]/20 to-transparent text-[#CDB7D9]'
+                ? 'bg-linear-to-r from-[#CDB7D9]/20 to-transparent text-[#CDB7D9]'
                 : 'text-[#CDB7D9]/50 hover:text-[#CDB7D9] hover:bg-[#CDB7D9]/5'
                 }`}
             >
@@ -327,59 +594,207 @@ export default function CoordinatorDashboard({ clubName }) {
                 key="events"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               >
-                {!showSuggestEdit ? (
-                  <div className="bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-3xl overflow-hidden shadow-2xl">
-                    <table className="w-full text-[#CDB7D9] text-left border-collapse">
-                      <thead className="bg-[#CDB7D9]/5 text-[#CDB7D9]/50 uppercase text-xs font-normal tracking-widest leading-loose">
-                        <tr>
-                          <th className="px-8 py-6">Event Name</th>
-                          <th className="px-8 py-6">Method</th>
-                          <th className="px-8 py-6 text-right">Fee</th>
-                          <th className="px-8 py-6 text-right">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#CDB7D9]/5">
-                        {events.map(event => (
-                          <tr key={event.$id} className="hover:bg-[#CDB7D9]/5 transition-colors">
-                            <td className="px-8 py-5 text-white font-medium text-lg">{event.name}</td>
-                            <td className="px-8 py-5 capitalize">{event.registrationMethod}</td>
-                            <td className="px-8 py-5 text-right font-mono text-white">₹{event.registrationFee}</td>
-                            <td className="px-8 py-5 text-right">
-                              <button
-                                onClick={() => startSuggestEdit(event)}
-                                className="px-4 py-2 bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg hover:bg-[#CDB7D9] hover:text-[#280338] text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
+                {!showAddEvent ? (
+                  <>
+                    {/* Maybe add a check if limiting number of events per club */}
+                    <div className="flex justify-end items-center mb-6">
+                      <button
+                        onClick={() => setShowAddEvent(true)}
+                        className="px-6 py-2 bg-[#CDB7D9] text-[#280338] rounded-xl font-bold flex items-center gap-2 hover:-translate-y-1 transition-all"
+                      >
+                        <FontAwesomeIcon icon={faPlus} /> Create Event
+                      </button>
+                    </div>
+
+                    {!showSuggestEdit ? (
+                      <div className="bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-3xl overflow-hidden shadow-2xl">
+                        <table className="w-full text-[#CDB7D9] text-left border-collapse">
+                          <thead className="bg-[#CDB7D9]/5 text-[#CDB7D9]/50 uppercase text-xs font-normal tracking-widest leading-loose">
+                            <tr>
+                              <th className="px-8 py-6">Event Name</th>
+                              <th className="px-8 py-6">Method</th>
+                              <th className="px-8 py-6 text-right">Fee</th>
+                              <th className="px-8 py-6 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-[#CDB7D9]/5">
+                            {events.map(event => (
+                              <tr key={event.$id} className="hover:bg-[#CDB7D9]/5 transition-colors">
+                                <td className="px-8 py-5 text-white font-medium text-lg">{event.name}</td>
+                                <td className="px-8 py-5 capitalize">{event.registrationMethod}</td>
+                                <td className="px-8 py-5 text-right font-mono text-white">₹{event.registrationFee}</td>
+                                <td className="px-8 py-5 text-right">
+                                  <button
+                                    onClick={() => startSuggestEdit(event)}
+                                    className="px-4 py-2 bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg hover:bg-[#CDB7D9] hover:text-[#280338] text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
+                                  >
+                                    <FontAwesomeIcon icon={faEdit} /> Suggest Edit
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {events.length === 0 && (
+                          <div className="text-center py-12 text-[#CDB7D9]/50">No events found for this club.</div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="max-w-4xl mx-auto">
+                        <button onClick={() => setShowSuggestEdit(false)} className="flex items-center gap-2 text-[#CDB7D9]/70 hover:text-[#CDB7D9] mb-4">
+                          <FontAwesomeIcon icon={faChevronLeft} /> Back to Events
+                        </button>
+                        <div className="bg-[#B7C9D9]/5 backdrop-blur-xl border border-[#CDB7D9]/20 rounded-3xl p-8">
+                          <div className="mb-6 border-b border-[#CDB7D9]/10 pb-4">
+                            <h3 className="text-2xl text-white font-abril mb-1">Suggest Edits: {newEvent.eventName}</h3>
+                            <p className="text-[#CDB7D9]/50 text-sm">Make changes below and submit for admin approval.</p>
+                          </div>
+
+                          <form onSubmit={handleSuggestEdit} className="space-y-6">
+                            <div className="group">
+                              <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Event Name</label>
+                              <input
+                                type="text" required
+                                value={newEvent.eventName}
+                                onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
+                                className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              />
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                              <div className="group">
+                                <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Poster</label>
+                                <div className="space-y-2">
+                                  <div className="relative">
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handlePosterSelect}
+                                      className="hidden"
+                                      id="poster-upload"
+                                    />
+                                    <label htmlFor="poster-upload" className="flex items-center justify-center w-full px-4 py-4 bg-black/20 border border-dashed border-[#CDB7D9]/30 rounded-2xl cursor-pointer hover:bg-[#CDB7D9]/5 transition-all text-[#CDB7D9]/70 gap-2">
+                                      {isSubmitting ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faUpload} />}
+                                      <span>{newEvent.posterPreview ? 'Change Poster' : 'Click to Upload'}</span>
+                                    </label>
+                                  </div>
+                                  {newEvent.posterPreview ? (
+                                    <div className="relative mt-2 rounded-xl overflow-hidden border border-[#CDB7D9]/20 h-32 w-full">
+                                      <img src={newEvent.posterPreview} alt="Preview" className="w-full h-full object-cover" />
+                                    </div>
+                                  ) : (
+                                    <input
+                                      type="url"
+                                      placeholder="Or paste URL"
+                                      value={newEvent.posterUrl}
+                                      onChange={(e) => setNewEvent({ ...newEvent, posterUrl: e.target.value })}
+                                      className="w-full px-4 py-2 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-xl focus:border-[#CDB7D9] outline-none text-sm"
+                                    />
+                                  )}
+                                </div>
+                              </div>
+                              <div className="group">
+                                <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Registration Fee</label>
+                                <input
+                                  type="number" min="0"
+                                  value={newEvent.registrationFee}
+                                  onChange={(e) => setNewEvent({ ...newEvent, registrationFee: e.target.value })}
+                                  className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="group">
+                              <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Registration Method</label>
+                              <select
+                                value={newEvent.registrationMethod}
+                                onChange={(e) => setNewEvent({ ...newEvent, registrationMethod: e.target.value })}
+                                className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                               >
-                                <FontAwesomeIcon icon={faEdit} /> Suggest Edit
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                    {events.length === 0 && (
-                      <div className="text-center py-12 text-[#CDB7D9]/50">No events found for this club.</div>
+                                <option value="internal" className="bg-[#1A0B2E]">Internal Form</option>
+                                <option value="external" className="bg-[#1A0B2E]">External Link</option>
+                              </select>
+                            </div>
+
+                            {newEvent.registrationMethod === 'external' ? (
+                              <div className="group">
+                                <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Registration Link</label>
+                                <input
+                                  type="url" required
+                                  value={newEvent.registrationLink}
+                                  onChange={(e) => setNewEvent({ ...newEvent, registrationLink: e.target.value })}
+                                  className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                                />
+                              </div>
+                            ) : (
+                              <div className="p-6 bg-black/20 rounded-2xl border border-[#CDB7D9]/10">
+                                <div className="flex justify-between items-center mb-4">
+                                  <h4 className="text-white font-medium">Form Fields</h4>
+                                  <button type="button" onClick={addFormField} className="text-xs bg-[#CDB7D9]/10 hover:bg-[#CDB7D9] hover:text-[#280338] px-3 py-1 rounded-lg transition-colors text-[#CDB7D9]">Add Field</button>
+                                </div>
+                                <div className="space-y-3">
+                                  {formFields.map((field, idx) => (
+                                    <div key={idx} className="flex gap-2">
+                                      <input
+                                        placeholder="Label"
+                                        value={field.label}
+                                        onChange={(e) => updateFormField(idx, 'label', e.target.value)}
+                                        className="flex-1 px-4 py-2 bg-[#1A0B2E] border border-[#CDB7D9]/20 rounded-xl text-sm"
+                                      />
+                                      <select
+                                        value={field.type}
+                                        onChange={(e) => updateFormField(idx, 'type', e.target.type)}
+                                        className="px-4 py-2 bg-[#1A0B2E] border border-[#CDB7D9]/20 rounded-xl text-sm"
+                                      >
+                                        <option value="text">Text</option>
+                                        <option value="number">Number</option>
+                                        <option value="email">Email</option>
+                                      </select>
+                                      <button type="button" onClick={() => removeFormField(idx)} className="text-red-400 hover:text-red-300 px-2"><FontAwesomeIcon icon={faTrash} /></button>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            <button disabled={isSubmitting} type="submit" className="w-full py-4 bg-[#CDB7D9] text-[#280338] font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(205,183,217,0.3)] hover:-translate-y-0.5 transition-all text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                              {isSubmitting ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faPaperPlane} />}
+                              {isSubmitting ? 'Sending...' : 'Send for Review'}
+                            </button>
+                          </form>
+                        </div>
+                      </div>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <div className="max-w-4xl mx-auto">
-                    <button onClick={() => setShowSuggestEdit(false)} className="flex items-center gap-2 text-[#CDB7D9]/70 hover:text-[#CDB7D9] mb-4">
+                    <button onClick={() => setShowAddEvent(false)} className="flex items-center gap-2 text-[#CDB7D9]/70 hover:text-[#CDB7D9] mb-4">
                       <FontAwesomeIcon icon={faChevronLeft} /> Back to Events
                     </button>
                     <div className="bg-[#B7C9D9]/5 backdrop-blur-xl border border-[#CDB7D9]/20 rounded-3xl p-8">
-                      <div className="mb-6 border-b border-[#CDB7D9]/10 pb-4">
-                        <h3 className="text-2xl text-white font-abril mb-1">Suggest Edits: {newEvent.eventName}</h3>
-                        <p className="text-[#CDB7D9]/50 text-sm">Make changes below and submit for admin approval.</p>
-                      </div>
-
-                      <form onSubmit={handleSuggestEdit} className="space-y-6">
-                        <div className="group">
-                          <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Event Name</label>
-                          <input
-                            type="text" required
-                            value={newEvent.eventName}
-                            onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
-                            className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
-                          />
+                      <h3 className="text-2xl text-white font-abril mb-6">Create New Event</h3>
+                      <form onSubmit={handleCreateEvent} className="space-y-6">
+                        <div className="grid md:grid-cols-2 gap-6">
+                          <div className="group">
+                            <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Club</label>
+                            <select
+                              required
+                              value={club.name}
+                              disabled
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            >
+                              <option value={club.name} className="bg-[#1A0B2E]">{club.name}</option>
+                            </select>
+                          </div>
+                          <div className="group">
+                            <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Event Name</label>
+                            <input
+                              type="text" required
+                              value={newEvent.eventName}
+                              onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            />
+                          </div>
                         </div>
 
                         <div className="grid md:grid-cols-2 gap-6">
@@ -394,8 +809,8 @@ export default function CoordinatorDashboard({ clubName }) {
                                   className="hidden"
                                   id="poster-upload"
                                 />
-                                <label htmlFor="poster-upload" className="flex items-center justify-center w-full px-4 py-4 bg-[#000]/20 border border-dashed border-[#CDB7D9]/30 rounded-2xl cursor-pointer hover:bg-[#CDB7D9]/5 transition-all text-[#CDB7D9]/70 gap-2">
-                                  {isSubmitting ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faUpload} />}
+                                <label htmlFor="poster-upload" className="flex items-center justify-center w-full px-4 py-4 bg-black/20 border border-dashed border-[#CDB7D9]/30 rounded-2xl cursor-pointer hover:bg-[#CDB7D9]/5 transition-all text-[#CDB7D9]/70 gap-2">
+                                  {isSubmittingEvent ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faUpload} />}
                                   <span>{newEvent.posterPreview ? 'Change Poster' : 'Click to Upload'}</span>
                                 </label>
                               </div>
@@ -409,7 +824,7 @@ export default function CoordinatorDashboard({ clubName }) {
                                   placeholder="Or paste URL"
                                   value={newEvent.posterUrl}
                                   onChange={(e) => setNewEvent({ ...newEvent, posterUrl: e.target.value })}
-                                  className="w-full px-4 py-2 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-xl focus:border-[#CDB7D9] outline-none text-sm"
+                                  className="w-full px-4 py-2 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-xl focus:border-[#CDB7D9] outline-none text-sm"
                                 />
                               )}
                             </div>
@@ -420,7 +835,7 @@ export default function CoordinatorDashboard({ clubName }) {
                               type="number" min="0"
                               value={newEvent.registrationFee}
                               onChange={(e) => setNewEvent({ ...newEvent, registrationFee: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             />
                           </div>
                         </div>
@@ -430,7 +845,7 @@ export default function CoordinatorDashboard({ clubName }) {
                           <select
                             value={newEvent.registrationMethod}
                             onChange={(e) => setNewEvent({ ...newEvent, registrationMethod: e.target.value })}
-                            className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                           >
                             <option value="internal" className="bg-[#1A0B2E]">Internal Form</option>
                             <option value="external" className="bg-[#1A0B2E]">External Link</option>
@@ -444,11 +859,11 @@ export default function CoordinatorDashboard({ clubName }) {
                               type="url" required
                               value={newEvent.registrationLink}
                               onChange={(e) => setNewEvent({ ...newEvent, registrationLink: e.target.value })}
-                              className="w-full px-6 py-4 bg-[#000]/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
                             />
                           </div>
                         ) : (
-                          <div className="p-6 bg-[#000]/20 rounded-2xl border border-[#CDB7D9]/10">
+                          <div className="p-6 bg-black/20 rounded-2xl border border-[#CDB7D9]/10">
                             <div className="flex justify-between items-center mb-4">
                               <h4 className="text-white font-medium">Form Fields</h4>
                               <button type="button" onClick={addFormField} className="text-xs bg-[#CDB7D9]/10 hover:bg-[#CDB7D9] hover:text-[#280338] px-3 py-1 rounded-lg transition-colors text-[#CDB7D9]">Add Field</button>
@@ -471,21 +886,23 @@ export default function CoordinatorDashboard({ clubName }) {
                                     <option value="number">Number</option>
                                     <option value="email">Email</option>
                                   </select>
-                                  <button type="button" onClick={() => removeFormField(idx)} className="text-red-400 hover:text-red-300 px-2"><FontAwesomeIcon icon={faTrash} /></button>
+                                  <button type="button" onClick={() => removeFormField(idx)} className="text-red-400 hover:text-red-300 px-2"><FontAwesomeIcon icon={faTimes} /></button>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
 
-                        <button disabled={isSubmitting} type="submit" className="w-full py-4 bg-[#CDB7D9] text-[#280338] font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(205,183,217,0.3)] hover:-translate-y-0.5 transition-all text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed">
-                          {isSubmitting ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faPaperPlane} />}
-                          {isSubmitting ? 'Sending...' : 'Send for Review'}
+                        <button disabled={isSubmittingEvent} type="submit" className="w-full py-4 bg-[#CDB7D9] text-[#280338] font-bold rounded-2xl hover:shadow-[0_0_20px_rgba(205,183,217,0.3)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                          {isSubmittingEvent ? <FontAwesomeIcon icon={faSpinner} spin className="mr-2" /> : null}
+                          {isSubmittingEvent ? 'Creating...' : 'Create Event'}
                         </button>
                       </form>
                     </div>
                   </div>
                 )}
+
+                
               </motion.div>
             )}
 
@@ -496,7 +913,7 @@ export default function CoordinatorDashboard({ clubName }) {
                 className="bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-3xl overflow-hidden shadow-2xl p-6"
               >
                 <div className="flex flex-col md:flex-row gap-4 mb-6">
-                  <div className="relative flex-1 bg-[#000]/20 rounded-xl overflow-hidden">
+                  <div className="relative flex-1 bg-black/20 rounded-xl overflow-hidden">
                     <FontAwesomeIcon icon={faSearch} className="absolute left-5 top-1/2 transform -translate-y-1/2 text-[#CDB7D9]/30" />
                     <input
                       type="text"
@@ -510,7 +927,7 @@ export default function CoordinatorDashboard({ clubName }) {
                     <select
                       value={filterEvent}
                       onChange={(e) => setFilterEvent(e.target.value)}
-                      className="w-full px-6 py-4 bg-[#000]/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer appearance-none"
+                      className="w-full px-6 py-4 bg-black/20 text-[#CDB7D9] rounded-xl border border-transparent focus:border-[#CDB7D9]/30 outline-none cursor-pointer appearance-none"
                     >
                       <option value="all" className="bg-[#1A0B2E]">All Events</option>
                       {events.map(e => <option key={e.$id} value={e.$id} className="bg-[#1A0B2E]">{e.name}</option>)}
@@ -581,6 +998,12 @@ export default function CoordinatorDashboard({ clubName }) {
 
           </AnimatePresence>
         </main>
+      </div>
+      {/* Notifications */}
+      <div className="fixed top-36 right-6 w-80 z-50 space-y-3">
+        {notifications.map(n => (
+          <NotificationItem key={n.id} notification={n} onDismiss={dismissNotification} />
+        ))}
       </div>
     </div>
   );
