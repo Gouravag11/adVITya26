@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,12 +49,21 @@ function LoginForm({ onSuccess }) {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
-            className="relative z-10 w-full max-w-6xl h-[650px] pt-18 px-20 flex gap-6 shadow-2xl"
-        >
+            className="
+                relative z-10
+                w-full max-w-6xl
+                min-h-[70vh] md:min-h-162.5
+                px-4 sm:px-8 md:px-12 lg:px-20
+                py-6 md:py-10
+                flex gap-6
+                shadow-2xl
+            "
+            >
+
             <div className="hidden md:flex w-1/2 rounded-3xl relative bg-[#B7C9D9]/10 backdrop-blur-lg items-center justify-center overflow-hidden">
             </div>
 
-            <div className="w-full md:w-1/2 px-12 py-16 rounded-3xl flex flex-col justify-center bg-[#B7C9D9]/10 backdrop-blur-lg">
+            <div className="w-full md:w-1/2 px-6 md:px-12 py-16 rounded-3xl flex flex-col justify-center bg-[#B7C9D9]/10 backdrop-blur-lg">
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -129,7 +139,7 @@ function LoginForm({ onSuccess }) {
                                 )}
                             </AnimatePresence>
                             <div className="relative flex items-center justify-center my-6">
-                                <div className="absolute h-[1px] w-full bg-white/10"></div>
+                                <div className="absolute h-px w-full bg-white/10"></div>
                                 <span className="relative bg-transparent px-6 text-gray-500 text-sm">Or</span>
                             </div>
 

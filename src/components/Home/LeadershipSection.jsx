@@ -1,50 +1,42 @@
 /* eslint-disable no-unused-vars */
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/css';
 
 const LeadershipSection = () => {
+    const [isMobile, setIsMobile] = useState(false);
     const [isInLeadershipSection, setIsInLeadershipSection] = useState(false);
 
     const leaders = [
-        { name: "Dr. G. Vishwanathan", position: "Chancellor" },
-        { name: "Leader Name 2", position: "Position 2" },
-        { name: "Leader Name 3", position: "Position 3" },
-        { name: "Leader Name 4", position: "Position 4" },
-        { name: "Leader Name 5", position: "Position 5" },
+        { name: "Dr. G. Vishwanathan", position: "Chancellor", img: "/Chancellor.jpg" },
+        { name: "Mr. Sankar Viswanathan", position: "Vice President", img: "/VP.jpg" },
+        { name: "Mrs. Kadhambari S Viswanathan", position: "Assistant Vice President", img: "/AVP.jpg" },
+        { name: "Prof. T. B. Sridharan", position: "Pro-Vice Chancellor", img: "/Pro_VC.jpg" },
+        { name: "Mr. K.K. Nair", position: "Acting Registrar", img: "/Registrar.jpg" },
     ];
 
     useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 640);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    useEffect(() => {
         const handleScroll = () => {
-            const leadershipSection = document.getElementById('leadership');
-            if (!leadershipSection) return;
+            const section = document.getElementById('leadership');
+            if (!section) return;
 
-            const isViewingLeadership =
+            const isViewing =
                 window.scrollY >
-                leadershipSection.offsetTop - (window.innerHeight * 3) / 4;
+                section.offsetTop - (window.innerHeight * 3) / 4;
 
-            setIsInLeadershipSection(isViewingLeadership);
+            setIsInLeadershipSection(isViewing);
         };
 
         window.addEventListener('scroll', handleScroll);
         handleScroll();
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    const sectionVariants = {
-        hidden: {
-            opacity: 0,
-            pointerEvents: "none",
-        },
-        visible: {
-            opacity: 1,
-            pointerEvents: "auto",
-            transition: {
-                staggerChildren: 0.1,
-            },
-        },
-    };
 
     return (
         <div
@@ -54,93 +46,80 @@ const LeadershipSection = () => {
             <div className="max-w-7xl mx-auto px-4">
                 {/* Heading */}
                 <motion.h2
-                    initial={{ opacity: 0, y: -20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className="text-4xl md:text-5xl font-bold text-white mb-16 text-center"
+                    initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                    animate={isInLeadershipSection ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0.8, scale: 0.9, y: 40 }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                    className="text-4xl md:text-5xl font-bold text-white mb-20 text-center"
                 >
                     Our Leadership
                 </motion.h2>
 
-                {/* Swiper (Mounted Once) */}
-                <motion.div
-                    variants={sectionVariants}
-                    initial="hidden"
-                    animate={isInLeadershipSection ? "visible" : "hidden"}
-                >
-                    <Swiper
-                        spaceBetween={25}
-                        slidesPerView={1.5}
-                        centeredSlides
-                        grabCursor
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 2,
-                                spaceBetween: 20,
-                                centeredSlides: false,
-                            },
-                            768: {
-                                slidesPerView: 3,
-                                spaceBetween: 30,
-                                centeredSlides: false,
-                            },
-                            1024: {
-                                slidesPerView: 4,
-                                spaceBetween: 40,
-                                centeredSlides: false,
-                            },
-                        }}
-                        className="leadership-swiper"
-                    >
-                        {leaders.map((leader, index) => (
-                            <SwiperSlide key={index}>
-                                <motion.div
-                                    initial={{ opacity: 0, y: 30 }}
-                                    animate={
-                                        isInLeadershipSection
-                                            ? { opacity: 1, y: 0 }
-                                            : { opacity: 0, y: 30 }
-                                    }
-                                    transition={{ duration: 0.6, delay: index * 0.15 }}
-                                    whileHover={{
-                                        y: -10,
-                                        transition: { duration: 0.3 },
-                                    }}
-                                    style={{ backgroundColor: 'rgba(183, 201, 217, 0.1)' }}
-                                    className="rounded-2xl py-6 px-2"
-                                >
-                                    <div className="w-full rounded-2xl overflow-hidden mb-3">
-                                        <img
-                                            src="/Chancellor.svg"
-                                            alt={leader.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
+                {/* TOP ROW – 3 CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10 px-8 md:px-20">
+                    {leaders.slice(0, 3).map((leader, index) => (
+                        <LeaderCard
+                            key={index}
+                            leader={leader}
+                            index={index}
+                            isMobile={isMobile}
+                            isVisible={isInLeadershipSection}
+                        />
+                    ))}
+                </div>
 
-                                    <div className="text-left px-2">
-                                        <h3 className="text-[#CDB7D9]/60 text-xl font-semibold mb-1">
-                                            {leader.name}
-                                        </h3>
-                                        <p className="text-[#CDB7D9]/40 text-lg">
-                                            {leader.position}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-                </motion.div>
+                {/* BOTTOM ROW – 2 CENTERED CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 sm:max-w-3xl mx-auto gap-8 mb-10 px-8 md:px-20">
+                    {leaders.slice(3).map((leader, index) => (
+                        <LeaderCard
+                            key={index + 3}
+                            leader={leader}
+                            index={index + 3}
+                            isMobile={isMobile}
+                            isVisible={isInLeadershipSection}
+                        />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const LeaderCard = ({ leader, index, isMobile, isVisible }) => {
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{
+                opacity: isVisible ? 1 : 0,
+                y: isVisible ? 0 : 30,
+            }}
+            transition={{
+                duration: 0.6,
+                delay: index * 0.15,
+            }}
+            whileHover={{
+                y: -10,
+                transition: { duration: 0.3 },
+            }}
+            style={{ backgroundColor: 'rgba(183, 201, 217, 0.1)' }}
+            className="rounded-2xl py-6 px-2"
+        >
+            <div className="w-full rounded-2xl overflow-hidden mb-3">
+                <img
+                    src={leader.img}
+                    alt={leader.name}
+                    className="w-full h-full object-cover"
+                />
             </div>
 
-            {/* Swiper overflow fix */}
-            <style>{`
-                .leadership-swiper,
-                .leadership-swiper .swiper-wrapper {
-                    overflow: visible !important;
-                }
-            `}</style>
-        </div>
+            <div className="text-left px-2">
+                <h3 className="text-[#CDB7D9]/60 text-md md:text-xl font-bold mb-1 min-h-[2.5em] md:min-h-[3.2em]">
+                    {leader.name}
+                </h3>
+                <p className="text-[#CDB7D9]/40 text-sm md:text-lg">
+                    {leader.position}
+                </p>
+            </div>
+        </motion.div>
     );
 };
 

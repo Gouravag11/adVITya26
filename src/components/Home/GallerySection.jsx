@@ -55,15 +55,15 @@ const GallerySection = () => {
         const ctx = gsap.context(() => {
             // --- 1. TEXT SCROLL ANIMATION ---
             gsap.fromTo(text,
-                { x: '100%' },
+                { x: '50%' },
                 {
                     x: '-120%',
                     ease: "none",
                     scrollTrigger: {
                         trigger: section,
                         start: 'top bottom',
-                        end: 'bottom center',
-                        scrub: 1,
+                        end: 'bottom bottom',
+                        scrub: 0.3,
                     }
                 }
             );
@@ -262,9 +262,9 @@ const GallerySection = () => {
     }, [isMobile]);
 
     const images = [
-        "/Image1.svg",
-        "/Image2.svg",
-        "/Image3.svg"
+        "/Sunidhi.jpg",
+        "/Raghu_Dixit.jpg",
+        "/AdVITya'25.png"
     ];
 
     const MarqueeContent = " SHOWCASE • RHYTHM • VIBES • 2026 • CONCERT • BAND • ADVITYA •";
@@ -276,12 +276,6 @@ const GallerySection = () => {
             <div className="pointer-events-none absolute top-0 left-0 w-full h-10 sm:h-20 z-40 
                             bg-linear-to-t from-transparent via-white/80 to-white">
             </div>
-
-            {/* Background Blob */}
-            <div 
-                ref={bgBlobRef}
-                className="absolute top-1/4 left-1/2 -translate-x-1/2 w-200 h-200 bg-[#6F00A0] rounded-full blur-[150px] opacity-[0.05] pointer-events-none -z-10"
-            ></div>
 
             {/* Left Marquee */}
             <div className="hidden xl:flex absolute top-0 left-0 h-full w-32 z-0 pointer-events-none items-center overflow-hidden">
@@ -321,7 +315,7 @@ const GallerySection = () => {
                     className="text-5xl sm:text-6xl md:text-9xl font-bold text-[#6F00A0] opacity-50 leading-none"
                     style={{ whiteSpace: 'nowrap' }}
                 >
-                    GLIMPSE FROM '24 GLIMPSE FROM '24 GLIMPSE FROM '24
+                    GLIMPSES FROM AdVITya'25 GLIMPSES FROM AdVITya'25 GLIMPSES FROM AdVITya'25
                 </h2>
             </div>
 
