@@ -29,7 +29,7 @@ function LoginForm({ onSuccess }) {
             } else {
                 setError('Failed to send magic link. Please try again.');
             }
-        } catch (err) {
+        } catch {
             setError('An unexpected error occurred.');
         } finally {
             setSendingLink(false);
@@ -39,7 +39,7 @@ function LoginForm({ onSuccess }) {
     if (loading) {
         return (
             <div className="flex items-center justify-center p-12 w-full h-full">
-                <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
             </div>
         );
     }
@@ -51,29 +51,55 @@ function LoginForm({ onSuccess }) {
             transition={{ duration: 0.5 }}
             className="
                 relative z-10
-                w-full max-w-6xl
+                w-full max-w-5xl
                 min-h-[70vh] md:min-h-162.5
                 px-4 sm:px-8 md:px-12 lg:px-20
                 py-6 md:py-10
-                flex gap-6
                 shadow-2xl
+                flex justify-center items-center
             "
+        >
+            {/* 💎 FORM GLASS CARD */}
+            <div
+                className="
+                    relative
+                    w-full md:w-1/2
+                    rounded-3xl
+                    overflow-hidden
+                    shadow-2xl
+                "
             >
+                {/* 🖼️ Background Image (In Case ever if you want a bg image for this form) */}
+                {/* <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+                    <img
+                        src="/AdvityaTitle.png"
+                        alt="Background"
+                        className="w-full h-auto object-contain px-2 md:px-4"
+                    />
+                </div> */}
 
-            <div className="hidden md:flex w-1/2 rounded-3xl relative bg-[#B7C9D9]/10 backdrop-blur-lg items-center justify-center overflow-hidden">
-            </div>
+                {/* 🌫️ Glass Overlay */}
+                <div className="absolute inset-0 bg-black/35 backdrop-blur-md" />
 
-            <div className="w-full md:w-1/2 px-6 md:px-12 py-16 rounded-3xl flex flex-col justify-center bg-[#B7C9D9]/10 backdrop-blur-lg">
+                {/* ✨ Actual Form Content */}
                 <motion.div
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="max-w-md mx-auto w-full"
+                    className="
+                        relative z-10
+                        mx-auto w-full
+                        bg-white/10
+                        border border-white/20
+                        rounded-3xl
+                        px-6 py-10 md:py-20
+                    "
                 >
                     <h1 className="text-4xl sm:text-5xl font-bold text-[#CDB7D9] mb-4 tracking-tight">LOGIN</h1>
-                    <p className="text-[#CDB7D9]/80 text-sm mb-8 leading-relaxed">
-                        Dive into the heart of VIT Bhopal with AdVlTya'25 - an electrifying blend of technology and culture. Crafted by the ingenious minds of VIT Bhopal students,
+                    <p className="text-[#CDB7D9]/80 text-sm leading-relaxed">
+                        Dive into the heart of VIT Bhopal with AdVlTya'25 - an electrifying blend of technology and culture
                     </p>
+                    <p className='text-white/40 text-xs mt-1 mb-10'>Crafted by the ingenious minds of VIT Bhopal students</p>
 
                     {magicLinkSent ? (
                         <motion.div
@@ -95,23 +121,24 @@ function LoginForm({ onSuccess }) {
                             </button>
                         </motion.div>
                     ) : (
-                        <form onSubmit={handleMagicLinkLogin} className="space-y-2">
-                            <div>
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="Enter your College Mail ID"
-                                    className="w-full bg-[#CDB7D9]/10 text-white placeholder-[#CDB7D9]/80 rounded-xl px-5 py-4 focus:outline-none transition-all text-sm"
-                                    required
-                                />
-                            </div>
+                        <form onSubmit={handleMagicLinkLogin} className="space-y-3">
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Enter your College Mail ID"
+                                className="
+                                    w-full bg-white/10 text-white placeholder-white/70
+                                    rounded-xl px-5 py-4
+                                    focus:outline-none focus:ring-2 focus:ring-[#CDB7D9]/50
+                                "
+                                required
+                            />
 
                             {error && (
                                 <p className="text-red-400 text-xs text-center">{error}</p>
                             )}
 
-                            <button type="submit" className="hidden" />
                             <AnimatePresence>
                                 {email && (
                                     <motion.div
@@ -123,10 +150,14 @@ function LoginForm({ onSuccess }) {
                                         <button
                                             type="submit"
                                             disabled={sendingLink}
-                                            className={`w-full py-4 rounded-xl cursor-pointer font-semibold transition-all duration-300 text-sm ${sendingLink
-                                                ? 'bg-[#CDB7D9]/10 text-[#CDB7D9]/80 cursor-not-allowed border border-white/5'
-                                                : 'bg-[#CDB7D9]/10 text-white border border-white/10 hover:bg-[#CDB7D9]/30'
-                                                }`}
+                                            className={`
+                                                w-full py-4 rounded-xl text-sm font-semibold
+                                                ${
+                                                    sendingLink
+                                                        ? 'bg-white/10 text-white/70 cursor-not-allowed'
+                                                        : 'bg-[#CDB7D9]/30 hover:bg-[#CDB7D9]/50 text-white'
+                                                }
+                                            `}
                                         >
                                             {sendingLink ? (
                                                 <span className="flex items-center justify-center gap-2">

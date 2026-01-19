@@ -165,7 +165,7 @@ export default function AdminDashboard() {
           category: newClub.category,
           description: newClub.description || '',
           logo: finalLogoUrl || '',
-          // createdAt: new Date().toISOString(), // YE KISI KE DATABASE ME TO PROBLEM KAR RAHA HAI
+          createdAt: new Date().toISOString(),
         }
       );
       setNewClub({ name: '', category: 'technical', description: '', logoFile: null, logoPreview: '', logoUrl: '' });
@@ -380,6 +380,7 @@ export default function AdminDashboard() {
           {
             name: changes.name,
             poster: changes.poster,
+            eventType:changes.eventType,
             registrationFee: changes.registrationFee,
             registrationMethod: changes.registrationMethod,
             registrationLink: changes.registrationMethod === 'external'
@@ -399,6 +400,7 @@ export default function AdminDashboard() {
             clubId: review.clubId,
             name: changes.name,
             poster: changes.poster,
+            eventType:changes.eventType,
             registrationFee: changes.registrationFee,
             registrationMethod: changes.registrationMethod,
             registrationLink: changes.registrationMethod === 'external'
@@ -979,28 +981,56 @@ export default function AdminDashboard() {
                 {!showAddClub ? (
                   <>
                     <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
-                      <div className="flex bg-[#B7C9D9]/5 p-1 rounded-xl backdrop-blur-md border border-[#CDB7D9]/10">
-                        {['all', 'technical', 'non-technical'].map((filter) => (
-                          <button
-                            key={filter}
-                            onClick={() => setClubCategoryFilter(filter)}
-                            className={`px-6 py-2 rounded-lg text-sm font-medium transition-all capitalize ${clubCategoryFilter === filter
+                    {/* MOBILE DROPDOWN */}
+                    <div className="w-full md:hidden">
+                      <select
+                        value={clubCategoryFilter}
+                        onChange={(e) => setClubCategoryFilter(e.target.value)}
+                        className="
+                          w-full px-4 py-3 rounded-xl
+                          bg-[#B7C9D9]/5 backdrop-blur-md
+                          border border-[#CDB7D9]/20
+                          text-[#CDB7D9]
+                          focus:outline-none focus:ring-2 focus:ring-[#CDB7D9]/40
+                          capitalize
+                        "
+                      >
+                        {['all', 'technical', 'non-technical', 'cultural', 'chapter', 'community'].map((filter) => (
+                          <option key={filter} value={filter} className="text-black capitalize">
+                            {filter}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* DESKTOP FILTER BUTTONS */}
+                    <div className="hidden md:flex bg-[#B7C9D9]/5 p-1 rounded-xl backdrop-blur-md border border-[#CDB7D9]/10">
+                      {['all', 'technical', 'non-technical', 'cultural', 'chapter', 'community'].map((filter) => (
+                        <button
+                          key={filter}
+                          onClick={() => setClubCategoryFilter(filter)}
+                          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all capitalize
+                            ${clubCategoryFilter === filter
                               ? 'bg-[#CDB7D9] text-[#280338] shadow-[0_0_15px_rgba(205,183,217,0.3)]'
                               : 'text-[#CDB7D9]/60 hover:text-[#CDB7D9]'
-                              }`}
-                          >
-                            {filter}
-                          </button>
-                        ))}
-                      </div>
-
-                      <button
-                        onClick={() => setShowAddClub(true)}
-                        className="px-8 py-3 bg-linear-to-r from-[#CDB7D9] to-[#9F87C4] text-[#280338] rounded-full cursor-pointer font-bold flex items-center gap-3 hover:-translate-y-1"
-                      >
-                        <FontAwesomeIcon icon={faPlus} /> Create New
-                      </button>
+                            }`}
+                        >
+                          {filter}
+                        </button>
+                      ))}
                     </div>
+
+                    {/* CREATE BUTTON */}
+                    <button
+                      onClick={() => setShowAddClub(true)}
+                      className="px-8 py-3 bg-linear-to-r from-[#CDB7D9] to-[#9F87C4]
+                        text-[#280338] rounded-full cursor-pointer font-bold
+                        flex items-center gap-3 hover:-translate-y-1 transition-transform"
+                    >
+                      <FontAwesomeIcon icon={faPlus} /> Create New
+                    </button>
+                  </div>
+
 
                     <div className="grid gap-4">
                       {clubs
@@ -1097,7 +1127,9 @@ export default function AdminDashboard() {
                             >
                               <option value="technical" className="bg-[#1A0B2E]">Technical</option>
                               <option value="non-technical" className="bg-[#1A0B2E]">Non-Technical</option>
-                              <option value="pro-night" className="bg-[#1A0B2E]">Pro Night</option>
+                              <option value="cultural" className="bg-[#1A0B2E]">Cultural</option>
+                              <option value="chapter" className="bg-[#1A0B2E]">Chapter</option>
+                              <option value="community" className="bg-[#1A0B2E]">Community</option>
                             </select>
                             <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#CDB7D9]/50">
                               <FontAwesomeIcon icon={faChevronRight} className="rotate-90" />

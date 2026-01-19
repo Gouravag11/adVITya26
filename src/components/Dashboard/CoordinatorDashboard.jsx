@@ -41,6 +41,7 @@ export default function CoordinatorDashboard({ clubName }) {
     posterPreview: '',     // Local preview
     posterUrl: '',         // Existing/Fallback URL
     registrationFee: 0,
+    eventType: 'technical',
     registrationMethod: 'internal',
     registrationLink: '',
   });
@@ -156,14 +157,14 @@ export default function CoordinatorDashboard({ clubName }) {
 
       await databases.createDocument(
         DATABASE_ID,
-        PENDING_EVENTS_COLLECTION_ID,
+        CLUBS_COLLECTION_ID,
         ID.unique(),
         {
           name: newClub.name,
           category: newClub.category,
           description: newClub.description || '',
           logo: finalLogoUrl || '',
-          // createdAt: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
         }
       );
       await databases.updateDocument(
@@ -190,6 +191,7 @@ export default function CoordinatorDashboard({ clubName }) {
       setIsSubmittingClub(false);
       setLoadingText("");
       setLoading(false);
+      window.location.reload();
     }
   };
 
@@ -233,6 +235,7 @@ export default function CoordinatorDashboard({ clubName }) {
         name: newEvent.eventName,
         poster: finalPosterUrl,
         registrationFee: Number(newEvent.registrationFee),
+        eventType: newEvent.eventType,
         registrationMethod: newEvent.registrationMethod,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
@@ -260,7 +263,7 @@ export default function CoordinatorDashboard({ clubName }) {
       setShowAddEvent(false);
       setNewEvent({
         clubId: '', eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: 0,
-        registrationMethod: 'internal', registrationLink: ''
+        eventType: 'technical', registrationMethod: 'internal', registrationLink: ''
       });
       setFormFields([]);
       // fetchData();
@@ -324,6 +327,7 @@ export default function CoordinatorDashboard({ clubName }) {
       posterPreview: event.poster || '', // Use existing as initial preview
       posterUrl: event.poster || '',
       registrationFee: event.registrationFee || 0,
+      eventType: event.eventType || '',
       registrationMethod: event.registrationMethod,
       registrationLink: event.registrationLink || '',
     });
@@ -358,6 +362,7 @@ export default function CoordinatorDashboard({ clubName }) {
         name: newEvent.eventName,
         poster: finalPosterUrl,
         registrationFee: Number(newEvent.registrationFee),
+        eventType: newEvent.eventType,
         registrationMethod: newEvent.registrationMethod,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
@@ -480,6 +485,9 @@ export default function CoordinatorDashboard({ clubName }) {
                       >
                         <option value="technical" className="bg-[#1A0B2E]">Technical</option>
                         <option value="non-technical" className="bg-[#1A0B2E]">Non-Technical</option>
+                        <option value="cultural" className="bg-[#1A0B2E]">Cultural</option>
+                        <option value="chapter" className="bg-[#1A0B2E]">Chapter</option>
+                        <option value="community" className="bg-[#1A0B2E]">Community</option>
                       </select>
                       <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-[#CDB7D9]/50">
                         <FontAwesomeIcon icon={faChevronRight} className="rotate-90" />
@@ -840,16 +848,30 @@ export default function CoordinatorDashboard({ clubName }) {
                           </div>
                         </div>
 
-                        <div className="group">
-                          <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Registration Method</label>
-                          <select
-                            value={newEvent.registrationMethod}
-                            onChange={(e) => setNewEvent({ ...newEvent, registrationMethod: e.target.value })}
-                            className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
-                          >
-                            <option value="internal" className="bg-[#1A0B2E]">Internal Form</option>
-                            <option value="external" className="bg-[#1A0B2E]">External Link</option>
-                          </select>
+                        <div className='grid md:grid-cols-2 gap-6'>
+                          <div className="group">
+                            <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Event Type</label>
+                            <select
+                              value={newEvent.eventType}
+                              onChange={(e) => setNewEvent({ ...newEvent, eventType: e.target.value })}
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            >
+                              <option value="technical" className="bg-[#1A0B2E]">Technical</option>
+                              <option value="non-technical" className="bg-[#1A0B2E]">Non-Technical</option>
+                            </select>
+                          </div>
+
+                          <div className="group">
+                            <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Registration Method</label>
+                            <select
+                              value={newEvent.registrationMethod}
+                              onChange={(e) => setNewEvent({ ...newEvent, registrationMethod: e.target.value })}
+                              className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                            >
+                              <option value="internal" className="bg-[#1A0B2E]">Internal Form</option>
+                              <option value="external" className="bg-[#1A0B2E]">External Link</option>
+                            </select>
+                          </div>
                         </div>
 
                         {newEvent.registrationMethod === 'external' ? (

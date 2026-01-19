@@ -66,7 +66,7 @@ const TeaserSection = () => {
                     className="mb-12"
                 >
                     <motion.h3 variants={itemVariants} className="text-[#CDB7D9] text-opacity-60 text-4xl md:text-6xl font-bold mb-2">{selectedYear === '2026' ? 'Teaser of' : "Glimpses Of"}</motion.h3>
-                    <motion.h2 variants={itemVariants} className="text-[#CDB7D9] text-opacity-60 text-5xl md:text-7xl font-bold mb-4">ADVITYA {selectedYear}</motion.h2>
+                    <motion.h2 variants={itemVariants} className="text-[#CDB7D9] text-opacity-60 text-5xl md:text-7xl font-bold mb-4">AdVITya {selectedYear}</motion.h2>
                     <motion.p variants={itemVariants} className="text-[#CDB7D9] text-opacity-60 text-xl md:text-2xl">Experience like never before</motion.p>
                 </motion.div>
 
