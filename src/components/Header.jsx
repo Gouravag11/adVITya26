@@ -209,7 +209,7 @@ function Header() {
 
                                                 {isOpen && (
                                                     <Link
-                                                        to="/register"
+                                                        to="#"
                                                         className="flex sm:hidden block items-center gap-2 px-4 py-2 rounded-lg bg-[#CDB7D9] text-[#280338] font-semibold hover:opacity-90 transition-opacity"
                                                     >
                                                         <img src="/Register.svg" alt="Register" className="w-5 h-5" />
