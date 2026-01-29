@@ -48,6 +48,7 @@ export default function CoordinatorDashboard({ clubName }) {
     time: '',
     registrationMethod: 'internal',
     registrationLink: '',
+    description: '',
   });
 
   // Upload State
@@ -77,6 +78,10 @@ export default function CoordinatorDashboard({ clubName }) {
     logoUrl: ''          // The fallback URL text input
   });
 
+  // Rejection Reason Modal State
+  const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
+  const [selectedRejectionReason, setSelectedRejectionReason] = useState('');
+
   const fetchClubData = async () => {
     if (!userData?.clubName) {
       setLoading(false);
@@ -101,34 +106,67 @@ export default function CoordinatorDashboard({ clubName }) {
       const clubDoc = clubRes.documents[0];
       setClub(clubDoc);
 
+      // Fetch Confirmed Events
       const eventsRes = await databases.listDocuments(
         DATABASE_ID,
         EVENTS_COLLECTION_ID,
         [Query.equal('clubId', clubDoc.$id)]
       );
 
-      let eventData = eventsRes.documents.map(event => {
-        let registrationFee = [{ type: '', fee: '' }]; // default
+      // Fetch Pending/Rejected Events
+      const pendingEventsRes = await databases.listDocuments(
+        DATABASE_ID,
+        PENDING_EVENTS_COLLECTION_ID,
+        [Query.equal('clubId', clubDoc.$id)] // Assuming clubId is stored in pending events
+      );
 
+      // Process Confirmed Events
+      let confirmedEvents = eventsRes.documents.map(event => {
+        let registrationFee = [{ type: '', fee: '' }];
         if (event.registrationFee) {
-          if (Array.isArray(event.registrationFee)) {
-            registrationFee = event.registrationFee;
-          } else {
-            try {
-              registrationFee = JSON.parse(event.registrationFee);
-            } catch (err) {
-              console.warn('Failed to parse registrationFee:', event.registrationFee, err);
-            }
-          }
+          try {
+            registrationFee = Array.isArray(event.registrationFee) ? event.registrationFee : JSON.parse(event.registrationFee);
+          } catch (err) { console.warn('Parse error', err); }
+        }
+        return { ...event, registrationFee, status: 'approved' };
+      });
+
+      // Process Pending Events
+      let pendingEvents = pendingEventsRes.documents.map(event => {
+        let proposed = {};
+        try {
+          proposed = JSON.parse(event.proposedChanges);
+        } catch (e) { console.error("Error parsing proposed changes", e); }
+
+        // If it's a new event (no originalEventId) or modification, we show it.
+        // We construct a displayable event object from the proposed changes
+        let registrationFee = [{ type: '', fee: '' }];
+        if (proposed.registrationFee) {
+          try {
+            registrationFee = typeof proposed.registrationFee === 'string' ? JSON.parse(proposed.registrationFee) : proposed.registrationFee;
+          } catch (e) { console.warn(e); }
         }
 
         return {
-          ...event,
-          registrationFee
+          $id: event.$id, // Use pending doc ID
+          originalEventId: event.originalEventId, // Keep track if it's an edit
+          name: proposed.name || event.eventName,
+          registrationFee,
+          registrationMethod: proposed.registrationMethod,
+          clubId: event.clubId,
+          status: event.status || 'pending', // 'pending' or 'rejected'
+          rejectionReason: proposed.rejectionReason || event.rejectionReason || '',
+          isPendingDoc: true // Flag to identify source
         };
       });
 
-      setEvents(eventData);
+      // Merge events
+      // Note: If an event has a pending edit, we might want to show the pending version OR show both.
+      // For simplicity in this list, let's show all. 
+      // Ideally, if an event has a pending edit, we might want to visually link them, but simply listing them sorted by date or name is a good start.
+      // To avoid confusion, let's append pending items.
+
+      setEvents([...confirmedEvents, ...pendingEvents]);
 
       const regsRes = await databases.listDocuments(
         DATABASE_ID,
@@ -160,9 +198,9 @@ export default function CoordinatorDashboard({ clubName }) {
 
   useEffect(() => {
     const handleResize = () => {
-        const mobile = window.innerWidth <= 1024;
-        setIsMobile(mobile);
-        setIsSidebarOpen(!mobile);
+      const mobile = window.innerWidth <= 1024;
+      setIsMobile(mobile);
+      setIsSidebarOpen(!mobile);
     };
 
     handleResize();
@@ -279,7 +317,9 @@ export default function CoordinatorDashboard({ clubName }) {
         time: newEvent.time,
         registrationMethod: newEvent.registrationMethod,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
+        registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
+        description: newEvent.description,
       }
 
       await databases.createDocument(
@@ -371,6 +411,7 @@ export default function CoordinatorDashboard({ clubName }) {
       time: event.time || '',
       registrationMethod: event.registrationMethod,
       registrationLink: event.registrationLink || '',
+      description: event.description || '',
     });
     setFormFields(parsedFields);
     setShowSuggestEdit(true);
@@ -409,7 +450,9 @@ export default function CoordinatorDashboard({ clubName }) {
         time: newEvent.time,
         registrationMethod: newEvent.registrationMethod,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
+        registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
+        description: newEvent.description,
       };
 
       await databases.createDocument(
@@ -451,7 +494,7 @@ export default function CoordinatorDashboard({ clubName }) {
   };
 
   const resetEventData = (() => {
-    setNewEvent({ eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: [{ type: '', fee: '' }], eventType: '', venue: '', date: '', time: '', registrationMethod: 'internal', registrationLink: '' });
+    setNewEvent({ eventName: '', posterFile: null, posterPreview: '', posterUrl: '', registrationFee: [{ type: '', fee: '' }], eventType: '', venue: '', date: '', time: '', registrationMethod: 'internal', registrationLink: '', description: '' });
   });
 
   const handleAddFee = () => {
@@ -472,7 +515,7 @@ export default function CoordinatorDashboard({ clubName }) {
   };
 
   const handleRemoveFee = (index) => {
-    if (newEvent.registrationFee.length !== 1){
+    if (newEvent.registrationFee.length !== 1) {
       const updatedFees = newEvent.registrationFee.filter((_, i) => i !== index);
       setNewEvent({ ...newEvent, registrationFee: updatedFees });
     }
@@ -588,7 +631,7 @@ export default function CoordinatorDashboard({ clubName }) {
           </div>
         </div>
       </>
-      
+
     );
   }
 
@@ -656,7 +699,7 @@ export default function CoordinatorDashboard({ clubName }) {
           ].map(item => (
             <button
               key={item.id}
-              onClick={() => { setActiveTab(item.id); setShowSuggestEdit(false); setIsSidebarOpen(!isSidebarOpen)}}
+              onClick={() => { setActiveTab(item.id); setShowSuggestEdit(false); setIsSidebarOpen(!isSidebarOpen) }}
               className={`flex items-center px-4 py-3.5 rounded-xl transition-all duration-300 font-medium group cursor-pointer ${activeTab === item.id
                 ? 'bg-linear-to-r from-[#CDB7D9]/20 to-transparent text-[#CDB7D9]'
                 : 'text-[#CDB7D9]/50 hover:text-[#CDB7D9] hover:bg-[#CDB7D9]/5'
@@ -695,8 +738,8 @@ export default function CoordinatorDashboard({ clubName }) {
                 isMobile
                   ? faBars
                   : isSidebarOpen
-                  ? faAngleDoubleLeft
-                  : faAngleDoubleRight
+                    ? faAngleDoubleLeft
+                    : faAngleDoubleRight
               }
               className="text-white text-xl bg-white/10 p-2 rounded-xl"
             />
@@ -724,7 +767,7 @@ export default function CoordinatorDashboard({ clubName }) {
                         </button>
                       </div>
                     )}
-                    
+
 
                     {!showSuggestEdit ? (
                       <div className="bg-[#B7C9D9]/5 backdrop-blur-md border border-[#CDB7D9]/10 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6 md:p-8">
@@ -735,6 +778,7 @@ export default function CoordinatorDashboard({ clubName }) {
                               <tr>
                                 <th className="px-8 py-6">Event Name</th>
                                 <th className="px-8 py-6">Reg Form</th>
+                                <th className="px-8 py-6 text-center">Status</th>
                                 <th className="px-8 py-6 text-right">Ticket Type : Fee</th>
                                 <th className="px-8 py-6 text-right">Actions</th>
                               </tr>
@@ -742,10 +786,25 @@ export default function CoordinatorDashboard({ clubName }) {
                             <tbody className="divide-y divide-[#CDB7D9]/20">
                               {events.map((event) => {
                                 const fees = Array.isArray(event.registrationFee) ? event.registrationFee : [];
+                                let reason = event.rejectionReason;
+                                if (!reason && event.proposedChanges) {
+                                  try {
+                                    const parsed = typeof event.proposedChanges === 'string' ? JSON.parse(event.proposedChanges) : event.proposedChanges;
+                                    reason = parsed.rejectionReason;
+                                  } catch (e) { }
+                                }
                                 return (
                                   <tr key={event.$id} className="hover:bg-[#CDB7D9]/5 transition-colors">
                                     <td className="px-8 py-5 text-white font-medium text-lg">{event.name}</td>
                                     <td className="px-8 py-5 capitalize">{event.registrationMethod}</td>
+                                    <td className="px-8 py-5 text-center">
+                                      <div className={`inline-flex items-center px-3 py-1 text-xs font-bold uppercase rounded-full border ${event.status === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                        event.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                          'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                        }`}>
+                                        {event.status}
+                                      </div>
+                                    </td>
                                     <td className="px-8 py-5 text-right font-mono text-white">
                                       {fees.length > 0 ? (
                                         <div className="flex flex-col items-end gap-1">
@@ -761,12 +820,26 @@ export default function CoordinatorDashboard({ clubName }) {
                                       )}
                                     </td>
                                     <td className="px-8 py-5 text-right">
-                                      <button
-                                        onClick={() => startSuggestEdit(event)}
-                                        className="px-4 py-2 bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg hover:bg-[#CDB7D9] hover:text-[#280338] text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
-                                      >
-                                        <FontAwesomeIcon icon={faEdit} /> Suggest Edit
-                                      </button>
+                                      {event.status === 'approved' ? (
+                                        <button
+                                          onClick={() => startSuggestEdit(event)}
+                                          className="px-4 py-2 bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg hover:bg-[#CDB7D9] hover:text-[#280338] text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
+                                        >
+                                          <FontAwesomeIcon icon={faEdit} /> Suggest Edit
+                                        </button>
+                                      ) : event.status === 'rejected' ? (
+                                        <button
+                                          onClick={() => {
+                                            setSelectedRejectionReason(reason || 'No reason provided.');
+                                            setShowRejectReasonModal(true);
+                                          }}
+                                          className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500 hover:text-white text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
+                                        >
+                                          See Reason
+                                        </button>
+                                      ) : (
+                                        <span className="text-[#CDB7D9]/30 text-xs uppercase font-medium">Locked</span>
+                                      )}
                                     </td>
                                   </tr>
                                 );
@@ -782,6 +855,22 @@ export default function CoordinatorDashboard({ clubName }) {
                             return (
                               <div key={event.$id} className="bg-[#CDB7D9]/10 p-4 rounded-2xl text-white flex flex-col gap-3 shadow-md">
                                 <div className="font-bold text-lg flex justify-center">{event.name}</div>
+                                <div className="flex justify-center mb-2">
+                                  <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${event.status === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                                    event.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                      'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                                    }`}>
+                                    {event.status}
+                                  </span>
+                                </div>
+                                {event.status === 'rejected' && (
+                                  <button
+                                    onClick={() => alert(`Rejection Reason:\n\n${event.rejectionReason}`)}
+                                    className="w-full mt-2 text-[10px] uppercase font-bold text-red-400 border border-red-500/30 px-2 py-1.5 rounded hover:bg-red-500/10 transition-colors"
+                                  >
+                                    See Reason
+                                  </button>
+                                )}
                                 <div className="capitalize"><span className='font-bold'>Reg Form:</span> {event.registrationMethod}</div>
                                 <div>
                                   <span className="font-bold">Ticket Fees:</span>
@@ -837,6 +926,17 @@ export default function CoordinatorDashboard({ clubName }) {
                                 value={newEvent.eventName}
                                 onChange={(e) => setNewEvent({ ...newEvent, eventName: e.target.value })}
                                 className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none"
+                              />
+                            </div>
+
+                            {/* Description */}
+                            <div className="group">
+                              <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Description</label>
+                              <textarea
+                                value={newEvent.description}
+                                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                                className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none h-32 resize-none"
+                                placeholder="Event Description..."
                               />
                             </div>
 
@@ -923,15 +1023,7 @@ export default function CoordinatorDashboard({ clubName }) {
                                   </div>
                                 ))}
 
-                                <div className="flex justify-center">
-                                  <button
-                                    type="button"
-                                    onClick={handleAddFee}
-                                    className="px-6 py-2 mt-4 bg-white/10 text-xl text-blue-500 rounded-2xl"
-                                  >
-                                    +
-                                  </button>
-                                </div>
+
                               </div>
                             </div>
 
@@ -1097,6 +1189,17 @@ export default function CoordinatorDashboard({ clubName }) {
                           </div>
                         </div>
 
+                        {/* Description */}
+                        <div className="group">
+                          <label className="block text-[#CDB7D9]/70 text-xs uppercase tracking-wider mb-2">Description</label>
+                          <textarea
+                            value={newEvent.description}
+                            onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
+                            className="w-full px-6 py-4 bg-black/20 border border-[#CDB7D9]/20 text-white rounded-2xl focus:border-[#CDB7D9] outline-none h-32 resize-none"
+                            placeholder="Event Description..."
+                          />
+                        </div>
+
                         {/* Poster & Registration Fees */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <div className="group">
@@ -1180,15 +1283,7 @@ export default function CoordinatorDashboard({ clubName }) {
                               </div>
                             ))}
 
-                            <div className="flex justify-center">
-                              <button
-                                type="button"
-                                onClick={handleAddFee}
-                                className="px-6 py-2 mt-4 bg-white/10 text-xl text-blue-500 rounded-2xl"
-                              >
-                                +
-                              </button>
-                            </div>
+
                           </div>
                         </div>
 
@@ -1323,7 +1418,7 @@ export default function CoordinatorDashboard({ clubName }) {
                   </div>
                 )}
 
-                
+
               </motion.div>
             )}
 
@@ -1426,6 +1521,47 @@ export default function CoordinatorDashboard({ clubName }) {
           <NotificationItem key={n.id} notification={n} onDismiss={dismissNotification} />
         ))}
       </div>
+      {/* Rejection Reason Modal */}
+      <AnimatePresence>
+        {showRejectReasonModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-[#1A0B2E] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <h3 className="text-lg font-bold text-red-400 flex items-center gap-2">
+                  Rejection Reason
+                </h3>
+                <button
+                  onClick={() => setShowRejectReasonModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                    {selectedRejectionReason}
+                  </p>
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowRejectReasonModal(false)}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-semibold transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

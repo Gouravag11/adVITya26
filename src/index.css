@@ -81,6 +81,23 @@ input[type="date"] {
    color: aliceblue;
 }
 
+/* Calendar Icon styling */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+   filter: invert(1) brightness(100%) sepia(100%) saturate(1000%) hue-rotate(220deg);
+   /* The above filter is an approximation. A cleaner way for a specific color is Invert then Drop Shadow or just use the color scheme-dark if supported, but filter is most reliable for color change */
+   /* Let's try a specific filter for pink #CDB7D9 or similar */
+   /* Target color similar to #CDB7D9 or purple/pink */
+   filter: invert(0.8) sepia(1) saturate(5) hue-rotate(240deg) brightness(1.2) drop-shadow(0 0 2px #CDB7D9);
+   cursor: pointer;
+   transition: filter 0.3s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover {
+   filter: invert(0.8) sepia(1) saturate(5) hue-rotate(240deg) brightness(1.5) drop-shadow(0 0 5px #ff77e9);
+}
+
 
 /* ============================================
    HOME PAGE STYLES

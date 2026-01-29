@@ -97,7 +97,7 @@ function LoginForm({ onSuccess }) {
                 >
                     <h1 className="text-4xl sm:text-5xl font-bold text-[#CDB7D9] mb-4 tracking-tight">LOGIN</h1>
                     <p className="text-[#CDB7D9]/80 text-sm leading-relaxed">
-                        Dive into the heart of VIT Bhopal with AdVlTya'25 - an electrifying blend of technology and culture
+                        Dive into the heart of VIT Bhopal with AdVlTya'26 - an electrifying blend of technology and culture
                     </p>
                     <p className='text-white/40 text-xs mt-1 mb-10'>Crafted by the ingenious minds of VIT Bhopal students</p>
 
@@ -152,10 +152,9 @@ function LoginForm({ onSuccess }) {
                                             disabled={sendingLink}
                                             className={`
                                                 w-full py-4 rounded-xl text-sm font-semibold
-                                                ${
-                                                    sendingLink
-                                                        ? 'bg-white/10 text-white/70 cursor-not-allowed'
-                                                        : 'bg-[#CDB7D9]/30 hover:bg-[#CDB7D9]/50 text-white'
+                                                ${sendingLink
+                                                    ? 'bg-white/10 text-white/70 cursor-not-allowed'
+                                                    : 'bg-[#CDB7D9]/30 hover:bg-[#CDB7D9]/50 text-white'
                                                 }
                                             `}
                                         >
@@ -178,7 +177,6 @@ function LoginForm({ onSuccess }) {
                                 type="button"
                                 onClick={async () => {
                                     await loginWithGoogle();
-                                    if (onSuccess) onSuccess();
                                 }}
                                 className="w-full bg-[#CDB7D9]/10 hover:bg-[#CDB7D9]/30 cursor-pointer text-white/90 border border-white/5 py-4 rounded-xl flex items-center justify-center gap-2 transition-all duration-300 group"
                             >
