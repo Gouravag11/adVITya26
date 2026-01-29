@@ -10,7 +10,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSpinner, faPlus, faTrash, faEdit, faSearch, faChevronLeft, faChevronRight,
   faCalendarAlt, faClipboardList, faTachometerAlt, faTimes, faAngleDoubleLeft, faAngleDoubleRight,
-  faPaperPlane, faUpload, faBars
+  faPaperPlane, faUpload, faBars, faHomeUser
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { uploadImageFile } from '@/lib/storage';
@@ -614,7 +614,7 @@ export default function CoordinatorDashboard({ clubName }) {
       <motion.aside
         className={`
           z-40 bg-[#1A0B2E]/90 border-r border-[#CDB7D9]/10
-          flex flex-col shadow-[5px_0_30px_rgba(0,0,0,0.5)]
+          flex flex-col shadow-[5px_0_30px_rgba(0,0,0,0.5)] pt-10 
           ${isMobile
             ? 'fixed top-0 left-0 h-screen w-72'
             : 'sticky top-0 h-screen'}
@@ -626,7 +626,10 @@ export default function CoordinatorDashboard({ clubName }) {
         }
         transition={{ duration: 0.3, ease: 'easeInOut' }}
       >
-        
+        <a href='/' className='flex items-center justify-center text-2xl mb-4 gap-2'>
+          <FontAwesomeIcon icon={faHomeUser} className={`transition-transform group-hover:scale-110`} />
+          {isSidebarOpen && (<span>Home</span>)}
+        </a>
         <div className="p-4 flex items-center justify-between">
           <AnimatePresence>
             {isSidebarOpen && (

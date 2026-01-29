@@ -27,7 +27,7 @@ const HeaderSpacer = ({ onHeightChange }) => {
 
     return (
         <div
-            className="fixed left-0 right-0 top-0 z-40 pointer-events-none bg-[#111111]"
+            className="fixed left-0 right-0 top-0 z-40 pointer-events-none bg-[#12001A]"
             style={{ height }}
             aria-hidden
         />
@@ -46,7 +46,7 @@ const EventCard = ({ event }) => {
         value && value.trim() !== '' ? value : 'TBD';
 
     return (
-        <div className="bg-[#1F1F1F] rounded-2xl p-4 border border-white/10 shadow-lg">
+        <div className="bg-[#B7C9D91A] rounded-2xl p-4 border border-white/10 shadow-lg">
             <div className="rounded-xl overflow-hidden mb-4 h-40 bg-white/5">
                 <img
                     src={event.poster}
@@ -84,9 +84,11 @@ const EventCard = ({ event }) => {
                 ))}
             </p>
 
-            <button className="w-full bg-[#515151] hover:bg-[#5F5F5F] transition text-white font-medium py-2 rounded-xl">
+            <a
+                href={`/register/${event.$id}`}
+                className="flex w-full px-4 py-2 justify-center bg-[#CC95E9] hover:bg-[#aa4ade] transition text-black font-medium rounded-xl cursor-pointer">
                 Read More
-            </button>
+            </a>
         </div>
     );
 };
@@ -95,7 +97,7 @@ const EventCard = ({ event }) => {
 
 /* ---------------------------- LOADING SKELETON ----------------------------- */
 const EventSkeleton = () => (
-    <div className="bg-[#1F1F1F] rounded-2xl p-4 border border-white/10 animate-pulse">
+    <div className="bg-[#B7C9D91A] rounded-2xl p-4 border border-white/10 animate-pulse">
         <div className="h-40 bg-white/10 rounded-xl mb-4" />
         <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
         <div className="h-3 bg-white/10 rounded w-1/2 mb-4" />
@@ -161,11 +163,11 @@ const EventsPage = () => {
         } finally {
             setLoading(false);
         }
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         fetchData();
-      }, []);
+    }, []);
 
     useEffect(() => {
         const handleResize = () => {
@@ -217,7 +219,7 @@ const EventsPage = () => {
             <HeaderSpacer onHeightChange={setTopOffset} />
 
             <main
-                className="fixed inset-x-0 bottom-0 bg-[#111111] text-white overflow-x-hidden items-center"
+                className="fixed inset-x-0 bottom-0 bg-[#12001A] text-white overflow-x-hidden items-center"
                 style={{ top: topOffset }}
             >
                 {isMobile && isFilterOpen && (
@@ -230,7 +232,7 @@ const EventsPage = () => {
                 <div className="h-full px-4 sm:px-6 lg:px-8 pt-4 grid grid-cols-12 gap-6 overflow-y-auto overflow-x-hidden">
                     <aside
                         className={`
-                            z-40 bg-[#111111] rounded-2xl py-4
+                            z-40 rounded-2xl py-4
                             transition-transform duration-300 ease-in-out
                             ${isMobile
                                 ? `fixed left-0 top-1/2 -translate-y-1/2 w-80 px-6
@@ -240,7 +242,7 @@ const EventsPage = () => {
                         `}
                     >
                         <div className='flex flex-col items-center'>
-                            <h1 className="text-4xl font-bold mb-6">AdVITya'26</h1>
+                            <h1 className="text-4xl font-bold mb-6">Events</h1>
 
                             <p className="text-gray-300 mb-6 leading-relaxed">
                                 Dive into the heart of VIT Bhopal with Advitya'25 — an
@@ -390,17 +392,17 @@ const EventsPage = () => {
                                     <EventSkeleton key={i} />
                                 ))
                                 : filteredEvents.length > 0
-                                ? filteredEvents.map((event) => (
-                                    <EventCard
-                                        key={event.id}
-                                        event={event}
-                                    />
-                                ))
-                                : (
-                                    <p className="text-gray-400">
-                                        No events match the selected filters.
-                                    </p>
-                                )}
+                                    ? filteredEvents.map((event) => (
+                                        <EventCard
+                                            key={event.$id}
+                                            event={event}
+                                        />
+                                    ))
+                                    : (
+                                        <p className="text-gray-400">
+                                            No events match the selected filters.
+                                        </p>
+                                    )}
                         </div>
                     </section>
                 </div>
