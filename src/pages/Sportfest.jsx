@@ -23,7 +23,7 @@ const HeaderSpacer = ({ onHeightChange }) => {
 
   return (
     <div
-      className="fixed left-0 right-0 top-0 z-40 pointer-events-none bg-[#111111]"
+      className="fixed left-0 right-0 top-0 z-40 pointer-events-none"
       style={{ height }}
       aria-hidden
     />
@@ -32,32 +32,50 @@ const HeaderSpacer = ({ onHeightChange }) => {
 
 const SportCard = ({ sport, onReadMore }) => {
   return (
-    <div className="bg-[#1F1F1F] rounded-2xl p-4 border border-white/10 shadow-lg">
-      <div className="rounded-xl overflow-hidden mb-4 h-40 bg-white/5">
+    <div className="bg-[#1A0A28] rounded-4xl p-2 border border-white/10 shadow-lg hover:border-purple-500/50 transition-all duration-300">
+      <div className="rounded-2xl overflow-hidden mb-4 h-48 bg-white/5">
         <img
           src={sport.image}
           alt={sport.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
         />
       </div>
+      <div className="p-5">
+        <h3 className="text-lg font-semibold text-white mb-1">
+          {sport.name}
+        </h3>
 
-      <h3 className="text-lg font-semibold text-white mb-1">
-        {sport.name}
-      </h3>
+        <p className="text-xs text-purple-300 mb-2 capitalize">
+          Sports Event
+        </p>
 
-      <p className="text-xs text-gray-400 mb-3 line-clamp-2">
-        {sport.details[0]}
-      </p>
+        <p className="text-xs text-gray-400 mb-1">
+          <span className="font-semibold">Format:</span>{' '}
+          {sport.details[0].replace('Format: ', '')}
+        </p>
 
-      <button
-        onClick={() => onReadMore(sport)}
-        className="w-full bg-[#515151] hover:bg-[#5F5F5F] transition text-white font-medium py-2 rounded-xl"
-      >
-        Read More
-      </button>
+        <p className="text-xs text-gray-400 mb-1">
+          <span className="font-semibold">Venue:</span>{' '}
+          Sports Complex
+        </p>
+
+        <p className="text-xs text-gray-400 mb-3">
+          <span className="font-semibold">Date:</span>{' '}
+          21 Feb 2025 • <span className="font-semibold">Time:</span>{' '}
+          10:00 AM
+        </p>
+
+        <button
+          onClick={() => onReadMore(sport)}
+          className="w-full bg-purple-400/80 hover:bg-purple-400 transition text-black font-semibold py-3 rounded-xl"
+        >
+          Read More
+        </button>
+      </div>
     </div>
   );
 };
+
 
 const SportModal = ({ sport, onClose, isMobile }) => {
   if (!sport) return null;
@@ -69,17 +87,17 @@ const SportModal = ({ sport, onClose, isMobile }) => {
         onClick={onClose}
       />
 
-      <div className={`relative bg-[#111111] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto ${isMobile ? 'w-[95%] max-w-md' : 'w-[90%] max-w-4xl'}`}>
+      <div className={`relative bg-[#0F041C] rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto ${isMobile ? 'w-[95%] max-w-md' : 'w-[90%] max-w-4xl'}`}>
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-10 h-10 bg-[#1F1F1F] rounded-full flex items-center justify-center text-white hover:bg-[#2F2F2F] transition"
+          className="absolute top-4 right-4 z-10 w-10 h-10 bg-[#1A0A28] rounded-full flex items-center justify-center text-white hover:bg-[#2F2F2F] transition"
         >
           ✕
         </button>
 
         <div className={`${isMobile ? 'flex flex-col' : 'flex flex-row'}`}>
           <div className={`${isMobile ? 'w-full' : 'w-2/5'} p-6`}>
-            <div className="bg-[#1F1F1F] rounded-2xl p-4 border border-white/10">
+            <div className="bg-[#1A0A28] rounded-2xl p-4 border border-white/10">
               <div className="rounded-xl overflow-hidden mb-4 relative">
                 <img
                   src={sport.image}
@@ -201,11 +219,14 @@ const SportModal = ({ sport, onClose, isMobile }) => {
 };
 
 const SportSkeleton = () => (
-  <div className="bg-[#1F1F1F] rounded-2xl p-4 border border-white/10 animate-pulse">
-    <div className="h-40 bg-white/10 rounded-xl mb-4" />
+  <div className="bg-[#1A0A28] rounded-2xl p-4 border border-white/10 animate-pulse">
+    <div className="h-48 bg-white/10 rounded-xl mb-4" />
     <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
-    <div className="h-3 bg-white/10 rounded w-1/2 mb-4" />
-    <div className="h-9 bg-white/10 rounded" />
+    <div className="h-3 bg-white/10 rounded w-1/3 mb-2" />
+    <div className="h-3 bg-white/10 rounded w-1/2 mb-1" />
+    <div className="h-3 bg-white/10 rounded w-2/3 mb-1" />
+    <div className="h-3 bg-white/10 rounded w-1/2 mb-3" />
+    <div className="h-9 bg-white/10 rounded-xl" />
   </div>
 );
 
@@ -216,6 +237,8 @@ function Sportfest() {
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [openFilter, setOpenFilter] = useState(null);
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
   const sportsData = [
     {
@@ -349,13 +372,23 @@ function Sportfest() {
   };
 
   return (
-    <>
+    <div
+      className="min-h-screen"
+      style={{
+        backgroundImage: 'url(/SportsFestBG.svg)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'fixed',
+        backgroundColor: '#0F041C'
+      }}
+    >
       <Header />
       <HeaderSpacer onHeightChange={setTopOffset} />
 
       <main
-        className="fixed inset-x-0 bottom-0 bg-[#111111] text-white overflow-x-hidden items-center"
-        style={{ top: topOffset }}
+        className="relative min-h-screen text-white overflow-x-hidden"
+        style={{ paddingTop: topOffset + 16 }}
       >
         {isMobile && isFilterOpen && (
           <div
@@ -364,16 +397,16 @@ function Sportfest() {
           />
         )}
 
-        <div className="h-full px-4 sm:px-6 lg:px-8 pt-4 grid grid-cols-12 gap-6 overflow-y-auto overflow-x-hidden">
+        <div className="px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
           <aside
             className={`
-                            z-40 bg-[#111111] rounded-2xl py-4
+                            z-40 rounded-2xl py-4
                             transition-transform duration-300 ease-in-out
                             ${isMobile
                 ? `fixed left-0 top-1/2 -translate-y-1/2 w-80 px-6
                                 max-h-[85vh] overflow-y-auto
                                 ${isFilterOpen ? 'translate-x-0' : '-translate-x-full'}`
-                : 'col-span-12 lg:col-span-4 sticky top-10 self-start'}
+                : 'col-span-12 lg:col-span-4 lg:sticky lg:top-24 self-start'}
                         `}
           >
             <div className='flex flex-col items-center'>
@@ -386,18 +419,74 @@ function Sportfest() {
 
             <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/10">
               <div className="flex justify-between items-center p-4">
-                <span className="font-semibold tracking-wide flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  Filters
+                <span className="font-semibold tracking-wide">
+                  FILTERS
                 </span>
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategories([]);
+                  }}
                   className="text-sm text-purple-400 hover:text-purple-300"
                 >
-                  Clear all
+                  Clear All
                 </button>
+              </div>
+
+              <div className="p-4">
+                <button
+                  onClick={() => setOpenFilter(openFilter === 'category' ? null : 'category')}
+                  className="w-full flex justify-between items-center font-medium"
+                >
+                  CATEGORY
+                  <span>{openFilter === 'category' ? '−' : '+'}</span>
+                </button>
+
+                {openFilter === 'category' && (
+                  <div className="mt-4 space-y-2 text-sm">
+                    {['Team Sports', 'Individual Sports'].map((t) => (
+                      <label key={t} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedCategories.includes(t)}
+                          onChange={() => {
+                            setSelectedCategories(prev =>
+                              prev.includes(t)
+                                ? prev.filter(c => c !== t)
+                                : [...prev, t]
+                            );
+                          }}
+                          className="w-4 h-4 accent-purple-500"
+                        />
+                        <span>{t}</span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4">
+                <button
+                  onClick={() => setOpenFilter(openFilter === 'sporttype' ? null : 'sporttype')}
+                  className="w-full flex justify-between items-center font-medium"
+                >
+                  SPORT TYPE
+                  <span>{openFilter === 'sporttype' ? '−' : '+'}</span>
+                </button>
+
+                {openFilter === 'sporttype' && (
+                  <div className="mt-4 space-y-2 text-sm">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={true}
+                        readOnly
+                        className="w-4 h-4 accent-purple-500"
+                      />
+                      <span>All Sports</span>
+                    </label>
+                  </div>
+                )}
               </div>
 
               <div className="p-4">
@@ -406,15 +495,8 @@ function Sportfest() {
                   placeholder="Search sports..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#1F1F1F] border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+                  className="w-full bg-[#1A0A28] border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
                 />
-              </div>
-
-              <div className="p-4 flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                </svg>
-                <span className="font-medium">Sort By</span>
               </div>
             </div>
           </aside>
@@ -452,7 +534,7 @@ function Sportfest() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 p-25 pb-8">
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
                   <SportSkeleton key={i} />
@@ -482,7 +564,7 @@ function Sportfest() {
           isMobile={isMobile}
         />
       )}
-    </>
+    </div>
   );
 }
 
