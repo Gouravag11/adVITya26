@@ -10,26 +10,30 @@ import Team from './pages/Team';
 import Sponsor from './pages/Sponsor';
 import Sportfest from './pages/Sportfest';
 
+import { ReactLenis } from 'lenis/react';
+
 function App() {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/events/:category" element={<CategoryEvents />} />
-            <Route path="/register/:eventId" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/team" element={<Team />} />
-            <Route path="/sponsor" element={<Sponsor />} />
-            <Route path="/sportfest" element={<Sportfest />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <ReactLenis root>
+      <Router>
+        <div className="flex flex-col min-h-screen">
+          {/* <Header /> */}
+          <main className="flex-1">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/events/:category" element={<CategoryEvents />} />
+              <Route path="/register/:eventId" element={<Register />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/team" element={<Team />} />
+              <Route path="/sponsor" element={<Sponsor />} />
+              <Route path="/sportfest" element={<Sportfest />} />
+            </Routes>
+          </main>
+          {/* <Footer /> */}
+        </div>
+      </Router>
+    </ReactLenis>
   );
 }
 
