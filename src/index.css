@@ -4,7 +4,6 @@
 @import 'swiper/css/navigation';
 @import 'swiper/css/pagination';
 @import 'swiper/css/effect-coverflow';
-@import 'swiper/css/autoplay';
 
 /* ============================================
    GLOBAL STYLES
@@ -35,6 +34,53 @@
       @apply bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600;
    }
 }
+
+/* Price Range Slider in Events Page */
+.range-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+  appearance: none;
+  background: transparent;
+}
+
+.range-slider::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  background: #c084fc;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.range-slider::-moz-range-thumb {
+  pointer-events: auto;
+  height: 16px;
+  width: 16px;
+  background: #c084fc;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+
+/* Hide number input spinners for webkit-based browsers (Chrome, Safari, etc.) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="date"] {
+  color: aliceblue;
+}
+
 
 /* ============================================
    HOME PAGE STYLES
