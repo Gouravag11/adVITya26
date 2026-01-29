@@ -14,7 +14,7 @@ function Home() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowPreLoader(false);
-    }, 10000); // 10 seconds duration
+    }, 4000); // 4 seconds duration
 
     return () => clearTimeout(timer);
   }, []);
@@ -43,7 +43,7 @@ function Home() {
       <section id="leadership">
         <LeadershipSection />
       </section>
-      
+
     </div>
   );
 }
