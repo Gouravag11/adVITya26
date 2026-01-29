@@ -25,7 +25,7 @@ function Header() {
         { name: 'Events', path: '/events' },
         { name: 'Sports Fest', path: '/sportfest' },
         { name: 'Sponsor Us', path: '/sponsor' },
-        { name: 'About Us', path: '/team' }
+        { name: 'Team', path: '/team' }
     ];
 
     const { isHeaderOpen, openHeader, closeHeader, headerMode, setHeaderMode } = useUI();
