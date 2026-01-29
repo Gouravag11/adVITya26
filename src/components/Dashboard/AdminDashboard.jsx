@@ -6,7 +6,7 @@ import { ID, Query } from 'appwrite';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus, faUsers, faBuilding, faSpinner, faSearch,
-  faChevronLeft, faChevronRight,
+  faChevronLeft, faChevronRight, faHomeUser,
   faTachometerAlt, faAngleDoubleLeft, faAngleDoubleRight,
   faTrophy, faCalendarAlt, faClipboardCheck, faCheck, faTimes, faEye, faUpload, faImage
 } from '@fortawesome/free-solid-svg-icons';
@@ -602,6 +602,10 @@ export default function AdminDashboard() {
         transition={{ duration: 0.3, ease: 'easeInOut' }}
         className="bg-[#1A0B2E]/80 border-r border-[#CDB7D9]/10 z-20 flex flex-col sticky top-0 h-screen pt-10 shadow-[5px_0_30px_rgba(0,0,0,0.5)]"
       >
+        <a href='/' className='flex items-center justify-center text-2xl mb-4 gap-2'>
+          <FontAwesomeIcon icon={faHomeUser} className={`transition-transform group-hover:scale-110`} />
+          {isSidebarOpen && (<span>Home</span>)}
+        </a>
         <div className="p-4 flex items-center justify-between">
           <AnimatePresence>
             {isSidebarOpen && (
