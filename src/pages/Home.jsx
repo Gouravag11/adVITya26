@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import PreLoader from "../components/PreLoader";
 import HeroSection from "../components/Home/HeroSection";
 import AboutSection from "../components/Home/AboutSection";
 import GallerySection from "../components/Home/GallerySection";
@@ -7,8 +9,19 @@ import EventsSection from "../components/Home/EventsSection";
 import LeadershipSection from "../components/Home/LeadershipSection";
 
 function Home() {
+  const [showPreLoader, setShowPreLoader] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPreLoader(false);
+    }, 10000); // 10 seconds duration
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-white">
+      <PreLoader show={showPreLoader} />
       <section id="hero">
         <HeroSection />
       </section>
