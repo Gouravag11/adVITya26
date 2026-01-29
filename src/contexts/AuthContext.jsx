@@ -23,6 +23,14 @@ export const AuthProvider = ({ children }) => {
             const userId = urlParams.get('userId');
             const secret = urlParams.get('secret');
 
+            // Check for OAuth errors passed in URL
+            const error = urlParams.get('error');
+            const errorDesc = urlParams.get('error_description');
+            if (error) {
+                console.error("OAuth Error from URL:", error, errorDesc);
+                alert(`Login Failed: ${errorDesc || error}`);
+            }
+
             if (userId && secret) {
                 await account.updateMagicURLSession(userId, secret);
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -30,6 +38,7 @@ export const AuthProvider = ({ children }) => {
 
             try {
                 const accountDetails = await account.get();
+                // console.log("User session active:", accountDetails.$id);
                 setUser(accountDetails);
 
                 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -42,6 +51,7 @@ export const AuthProvider = ({ children }) => {
                             USERS_COLLECTION_ID,
                             accountDetails.$id
                         );
+                        // console.log("User document fetched:", userDoc.$id);
 
                         setUserData({
                             ...userDoc,
@@ -49,8 +59,10 @@ export const AuthProvider = ({ children }) => {
                             email: accountDetails.email,
                         });
                     } catch (error) {
+                        // console.error("Error fetching user document details:", error);
                         if (error.code === 404) {
                             try {
+                                // console.log("Creating new user document...");
                                 const newUserDoc = await databases.createDocument(
                                     DATABASE_ID,
                                     USERS_COLLECTION_ID,
@@ -100,7 +112,8 @@ export const AuthProvider = ({ children }) => {
             } catch (error) {
                 // Suppress 401 error for guests
                 if (error.code === 401) {
-                    console.debug("User is not logged in (Guest)");
+                    // Start of Debug: 
+                    // console.debug("User is not logged in (Guest) or Session Cookie missing.");
                 } else {
                     console.error("Error fetching account details:", error);
                 }
@@ -109,6 +122,7 @@ export const AuthProvider = ({ children }) => {
             }
 
         } catch (error) {
+            console.error("Unexpected error in checkUserStatus:", error);
             setUser(null);
             setUserData(null);
         } finally {
@@ -118,13 +132,17 @@ export const AuthProvider = ({ children }) => {
 
     const loginWithGoogle = async () => {
         try {
+            console.log("Initiating Google Login...");
+            console.log("Success URL:", `${window.location.origin}/dashboard`);
+            console.log("Failure URL:", `${window.location.origin}/login`);
+
             await account.createOAuth2Session(
                 OAuthProvider.Google,
                 `${window.location.origin}/dashboard`,
                 `${window.location.origin}/login`
             );
         } catch (error) {
-            console.error(error);
+            console.error("Google Login Error:", error);
         }
     };
 

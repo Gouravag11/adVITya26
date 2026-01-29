@@ -44,7 +44,7 @@ const EventDetailModal = ({ event, onClose }) => {
                                     {event.name}
                                 </h2>
                                 <p className="text-sm text-gray-400 leading-relaxed font-poppins font-normal">
-                                    {event.desc}
+                                    {event.description || event.desc}
                                 </p>
                             </div>
                         </div>
@@ -70,47 +70,54 @@ const EventDetailModal = ({ event, onClose }) => {
                                 {/* Main Content Box */}
                                 <div className="bg-[#1A0B2E] rounded-3xl p-4 md:p-8 -mt-6 relative z-10 flex-grow">
                                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                        {/* Left Column - Event Features & Coordinators */}
+                                        {/* Left Column - Description & Registration Info */}
                                         <div className="space-y-6">
-                                            {/* Event Features */}
-                                            {features.length > 0 && (
-                                                <div>
-                                                    <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">EVENT FEATURES</h3>
-                                                    <ul className="space-y-2">
-                                                        {features.map((feature, idx) => (
-                                                            <li key={idx} className="flex items-start gap-2 text-gray-300 font-poppins text-sm">
-                                                                <span className="w-1 h-1 rounded-full bg-gray-400 mt-2"></span>
-                                                                {feature}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
+                                            {/* Description (Mobile/Tablet view mostly, or if long) */}
 
-                                            {/* Faculty Coordinators */}
-                                            {facultyCoordinators.length > 0 && (
-                                                <div>
-                                                    <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">FACULTY COORDINATORS</h3>
-                                                    <ul className="space-y-2">
-                                                        {facultyCoordinators.map((coordinator, idx) => (
-                                                            <li key={idx} className="flex items-start gap-2 text-gray-300 font-poppins text-sm">
-                                                                <span className="w-1 h-1 rounded-full bg-gray-400 mt-2"></span>
-                                                                {coordinator}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
 
-                                            {/* Student Coordinators */}
-                                            {studentCoordinators.length > 0 && (
+                                            {/* Registration Fees */}
+                                            <div>
+                                                <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">REGISTRATION DETAILS</h3>
+                                                <div className="space-y-3">
+                                                    <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                                                        <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">About Event</div>
+                                                        <p className="text-sm text-gray-300 leading-relaxed font-poppins font-normal whitespace-pre-wrap">
+                                                            {event.description || event.desc}
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                                                        <div className="text-xs text-gray-400 mb-2 uppercase tracking-wider">Ticket Fees</div>
+                                                        <div className="space-y-2">
+                                                            {event.registrationFee && event.registrationFee.length > 0 ? (
+                                                                event.registrationFee.map((fee, idx) => (
+                                                                    <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 last:border-0 pb-1 last:pb-0">
+                                                                        <span className="text-gray-300 capitalize">{fee.type}</span>
+                                                                        <span className="text-[#CDB7D9] font-bold font-mono">₹{fee.fee}</span>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div className="text-white font-medium">Free</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Event Type */}
+                                                    <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+                                                        <div className="text-xs text-gray-400 mb-1 uppercase tracking-wider">Event Category</div>
+                                                        <div className="text-white font-medium capitalize">{event.eventType || 'General'}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Show Coordinators only if they exist (Legacy support) */}
+                                            {(event.studentCoordinators?.length > 0 || event.facultyCoordinators?.length > 0) && (
                                                 <div>
-                                                    <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">STUDENT COORDINATORS</h3>
-                                                    <ul className="space-y-2">
-                                                        {studentCoordinators.map((coordinator, idx) => (
-                                                            <li key={idx} className="flex items-start gap-2 text-gray-300 font-poppins text-sm">
-                                                                <span className="w-1 h-1 rounded-full bg-gray-400 mt-2"></span>
-                                                                {coordinator}
+                                                    <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">COORDINATORS</h3>
+                                                    <ul className="space-y-1">
+                                                        {[...(event.facultyCoordinators || []), ...(event.studentCoordinators || [])].map((c, i) => (
+                                                            <li key={i} className="text-sm text-gray-300 flex items-center gap-2">
+                                                                <span className="w-1.5 h-1.5 rounded-full bg-[#CDB7D9]"></span> {c}
                                                             </li>
                                                         ))}
                                                     </ul>
@@ -120,7 +127,7 @@ const EventDetailModal = ({ event, onClose }) => {
 
                                         {/* Right Column - Event Details Grid */}
                                         <div>
-                                            <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">EVENT DETAILS</h3>
+                                            <h3 className="text-sm font-semibold text-gray-400 mb-3 font-poppins uppercase">EVENT LOGISTICS</h3>
                                             <div className="grid grid-cols-2 gap-4">
                                                 {/* Date */}
                                                 <div className="bg-white/5 border border-white/10 rounded-2xl p-4 flex flex-col items-center justify-center gap-3 hover:bg-pink-500/10 hover:border-pink-500/50 transition-all duration-300 group hover:-translate-y-1">
@@ -155,7 +162,7 @@ const EventDetailModal = ({ event, onClose }) => {
                                                         <FontAwesomeIcon icon={faUsers} className="text-emerald-400 text-lg" />
                                                     </div>
                                                     <p className="text-xs text-gray-300 font-poppins text-center font-medium group-hover:text-emerald-300 transition-colors">
-                                                        {event.seats || 'Open'}
+                                                        Open
                                                     </p>
                                                 </div>
                                             </div>
@@ -165,18 +172,33 @@ const EventDetailModal = ({ event, onClose }) => {
                             </div>
 
                             {/* Register Button - Outside the box, bottom right */}
-                            <div className="flex justify-end mt-2">
-                                <Link
-                                    to={`/register/${event.$id}`}
-                                    className="px-6 py-3 bg-[#CDB7D9] hover:bg-[#b89fc9] text-[#1A0B2E] font-bold rounded-xl transition-all duration-300 font-poppins flex items-center justify-center gap-3 text-sm shadow-lg"
-                                    onClick={onClose}
-                                >
-                                    <img src="/Register.svg" alt="" className="w-5 h-5" />
-                                    VIT STUDENT
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                </Link>
+                            <div className="flex justify-end mt-2 animate-fadeIn">
+                                {event.registrationMethod === 'external' ? (
+                                    <a
+                                        href={event.registrationLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-6 py-3 bg-[#CDB7D9] hover:bg-[#b89fc9] text-[#1A0B2E] font-bold rounded-xl transition-all duration-300 font-poppins flex items-center justify-center gap-3 text-sm shadow-lg transform hover:-translate-y-1"
+                                        onClick={onClose}
+                                    >
+                                        REGISTER NOW
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                        </svg>
+                                    </a>
+                                ) : (
+                                    <Link
+                                        to={`/register/${event.$id}`}
+                                        className="px-6 py-3 bg-[#CDB7D9] hover:bg-[#b89fc9] text-[#1A0B2E] font-bold rounded-xl transition-all duration-300 font-poppins flex items-center justify-center gap-3 text-sm shadow-lg transform hover:-translate-y-1"
+                                        onClick={onClose}
+                                    >
+                                        <img src="/Register.svg" alt="" className="w-5 h-5" />
+                                        VIT STUDENT
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </Link>
+                                )}
                             </div>
                         </div>
                     </div>

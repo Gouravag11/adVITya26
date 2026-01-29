@@ -78,6 +78,10 @@ export default function CoordinatorDashboard({ clubName }) {
     logoUrl: ''          // The fallback URL text input
   });
 
+  // Rejection Reason Modal State
+  const [showRejectReasonModal, setShowRejectReasonModal] = useState(false);
+  const [selectedRejectionReason, setSelectedRejectionReason] = useState('');
+
   const fetchClubData = async () => {
     if (!userData?.clubName) {
       setLoading(false);
@@ -151,7 +155,7 @@ export default function CoordinatorDashboard({ clubName }) {
           registrationMethod: proposed.registrationMethod,
           clubId: event.clubId,
           status: event.status || 'pending', // 'pending' or 'rejected'
-          rejectionReason: event.rejectionReason || '',
+          rejectionReason: proposed.rejectionReason || event.rejectionReason || '',
           isPendingDoc: true // Flag to identify source
         };
       });
@@ -782,24 +786,24 @@ export default function CoordinatorDashboard({ clubName }) {
                             <tbody className="divide-y divide-[#CDB7D9]/20">
                               {events.map((event) => {
                                 const fees = Array.isArray(event.registrationFee) ? event.registrationFee : [];
+                                let reason = event.rejectionReason;
+                                if (!reason && event.proposedChanges) {
+                                  try {
+                                    const parsed = typeof event.proposedChanges === 'string' ? JSON.parse(event.proposedChanges) : event.proposedChanges;
+                                    reason = parsed.rejectionReason;
+                                  } catch (e) { }
+                                }
                                 return (
                                   <tr key={event.$id} className="hover:bg-[#CDB7D9]/5 transition-colors">
                                     <td className="px-8 py-5 text-white font-medium text-lg">{event.name}</td>
                                     <td className="px-8 py-5 capitalize">{event.registrationMethod}</td>
                                     <td className="px-8 py-5 text-center">
                                       <div className={`inline-flex items-center px-3 py-1 text-xs font-bold uppercase rounded-full border ${event.status === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                        event.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20 cursor-help' :
+                                        event.status === 'rejected' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                                           'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
-                                        }`}
-                                        title={event.status === 'rejected' ? `Reason: ${event.rejectionReason}` : ''}
-                                      >
+                                        }`}>
                                         {event.status}
                                       </div>
-                                      {event.status === 'rejected' && (
-                                        <div className="text-[10px] text-red-400/70 mt-1 max-w-[150px] truncate mx-auto">
-                                          {event.rejectionReason}
-                                        </div>
-                                      )}
                                     </td>
                                     <td className="px-8 py-5 text-right font-mono text-white">
                                       {fees.length > 0 ? (
@@ -822,6 +826,16 @@ export default function CoordinatorDashboard({ clubName }) {
                                           className="px-4 py-2 bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 text-[#CDB7D9] rounded-lg hover:bg-[#CDB7D9] hover:text-[#280338] text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
                                         >
                                           <FontAwesomeIcon icon={faEdit} /> Suggest Edit
+                                        </button>
+                                      ) : event.status === 'rejected' ? (
+                                        <button
+                                          onClick={() => {
+                                            setSelectedRejectionReason(reason || 'No reason provided.');
+                                            setShowRejectReasonModal(true);
+                                          }}
+                                          className="px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg hover:bg-red-500 hover:text-white text-xs font-bold uppercase transition-all flex items-center gap-2 ml-auto"
+                                        >
+                                          See Reason
                                         </button>
                                       ) : (
                                         <span className="text-[#CDB7D9]/30 text-xs uppercase font-medium">Locked</span>
@@ -850,9 +864,12 @@ export default function CoordinatorDashboard({ clubName }) {
                                   </span>
                                 </div>
                                 {event.status === 'rejected' && (
-                                  <div className="bg-red-500/10 p-2 rounded-lg border border-red-500/20 text-red-300 text-xs text-center mb-2">
-                                    Reason: {event.rejectionReason}
-                                  </div>
+                                  <button
+                                    onClick={() => alert(`Rejection Reason:\n\n${event.rejectionReason}`)}
+                                    className="w-full mt-2 text-[10px] uppercase font-bold text-red-400 border border-red-500/30 px-2 py-1.5 rounded hover:bg-red-500/10 transition-colors"
+                                  >
+                                    See Reason
+                                  </button>
                                 )}
                                 <div className="capitalize"><span className='font-bold'>Reg Form:</span> {event.registrationMethod}</div>
                                 <div>
@@ -1266,15 +1283,7 @@ export default function CoordinatorDashboard({ clubName }) {
                               </div>
                             ))}
 
-                            <div className="flex justify-center">
-                              <button
-                                type="button"
-                                onClick={handleAddFee}
-                                className="px-6 py-2 mt-4 bg-white/10 text-xl text-blue-500 rounded-2xl"
-                              >
-                                +
-                              </button>
-                            </div>
+
                           </div>
                         </div>
 
@@ -1512,6 +1521,47 @@ export default function CoordinatorDashboard({ clubName }) {
           <NotificationItem key={n.id} notification={n} onDismiss={dismissNotification} />
         ))}
       </div>
+      {/* Rejection Reason Modal */}
+      <AnimatePresence>
+        {showRejectReasonModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-md bg-[#1A0B2E] border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-white/5">
+                <h3 className="text-lg font-bold text-red-400 flex items-center gap-2">
+                  Rejection Reason
+                </h3>
+                <button
+                  onClick={() => setShowRejectReasonModal(false)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  <FontAwesomeIcon icon={faTimes} />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                  <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap font-mono">
+                    {selectedRejectionReason}
+                  </p>
+                </div>
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowRejectReasonModal(false)}
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-sm font-semibold transition-all"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

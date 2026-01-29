@@ -412,6 +412,7 @@ export default function AdminDashboard() {
             venue: changes.venue,
             date: changes.date,
             time: changes.time,
+            description: changes.description,
             registrationFee: changes.registrationFee,
             registrationMethod: changes.registrationMethod,
             registrationLink: changes.registrationMethod === 'external'
@@ -435,6 +436,7 @@ export default function AdminDashboard() {
             venue: changes.venue,
             date: changes.date,
             time: changes.time,
+            description: changes.description,
             registrationFee: changes.registrationFee,
             registrationMethod: changes.registrationMethod,
             registrationLink: changes.registrationMethod === 'external'
@@ -482,7 +484,8 @@ export default function AdminDashboard() {
     setShowRejectModal(true);
   }
 
-  const handleConfirmReject = async () => {
+  const handleConfirmReject = async (e) => {
+    if (e) e.preventDefault();
     if (!rejectionReason.trim()) {
       addNotification({
         id: Date.now(),
@@ -495,13 +498,48 @@ export default function AdminDashboard() {
     setLoadingText("Rejecting...");
     setLoading(true);
     try {
+      console.log("Rejecting review:", reviewToReject, "Reason:", rejectionReason);
+
+      // Fetch the latest version of the review to ensure we have valid JSON
+      // (Using the review object we already have in state might be stale if we didn't update it, 
+      // but reviewToReject is just an ID. We need the current proposedChanges)
+      // Actually, we can just use the `review` object from the list if available, or just fetch it.
+      // Better to just fetch or use the one selected if it matches.
+
+      let currentChanges = {};
+      if (selectedReview && selectedReview.$id === reviewToReject) {
+        try {
+          currentChanges = typeof selectedReview.proposedChanges === 'string'
+            ? JSON.parse(selectedReview.proposedChanges)
+            : selectedReview.proposedChanges;
+        } catch (e) { console.warn("Could not parse existing changes", e); }
+      } else {
+        // Fallback: This might be rare if we are using the modal which implies selectedReview
+        // But to be safe, we just overwrite or init empty if we can't find it. 
+        // Ideally we should have the full object.
+        // Let's assume selectedReview is the one being rejected or we find it in reviews state.
+        const review = reviews.find(r => r.$id === reviewToReject);
+        if (review) {
+          try {
+            currentChanges = typeof review.proposedChanges === 'string'
+              ? JSON.parse(review.proposedChanges)
+              : review.proposedChanges;
+          } catch (e) { console.warn("Could not parse existing changes", e); }
+        }
+      }
+
+      const updatedChanges = {
+        ...currentChanges,
+        rejectionReason: rejectionReason
+      };
+
       await databases.updateDocument(
         DATABASE_ID,
         PENDING_EVENTS_COLLECTION_ID,
         reviewToReject,
         {
           status: 'rejected',
-          rejectionReason: rejectionReason
+          proposedChanges: JSON.stringify(updatedChanges)
         }
       );
       addNotification({
@@ -511,13 +549,13 @@ export default function AdminDashboard() {
       });
       setSelectedReview(null);
       setShowRejectModal(false);
-      fetchData();
+      await fetchData(); // Ensure data is refreshed
     } catch (error) {
       console.error("Error rejecting review:", error);
       addNotification({
         id: Date.now(),
         type: 'error',
-        message: 'Error Rejecting Request!',
+        message: 'Error Rejecting Request!' + (error.message ? ": " + error.message : ""),
       });
     } finally {
       setLoadingText("");
@@ -843,13 +881,81 @@ export default function AdminDashboard() {
                       <div className="bg-[#B7C9D9]/5 p-8 rounded-3xl border border-[#CDB7D9]/10">
                         <h3 className="text-xl text-white mb-6 border-b border-[#CDB7D9]/10 pb-4">Proposed Changes</h3>
                         {(() => {
-                          const changes = JSON.parse(selectedReview.proposedChanges);
+                          let changes = {};
+                          try {
+                            changes = typeof selectedReview.proposedChanges === 'string' ? JSON.parse(selectedReview.proposedChanges) : selectedReview.proposedChanges;
+                          } catch (e) { console.error("Error parsing changes", e); return <div className="text-red-400">Error parsing data</div>; }
+
+                          let fees = [];
+                          if (changes.registrationFee) {
+                            try {
+                              fees = typeof changes.registrationFee === 'string' ? JSON.parse(changes.registrationFee) : changes.registrationFee;
+                            } catch (e) { console.warn("Error parsing fees", e); }
+                          }
+
                           return (
-                            <div className="space-y-4 text-sm">
-                              <div><span className="text-[#CDB7D9]/50 block">Name</span> <span className="text-white text-lg">{changes.name}</span></div>
-                              <div><span className="text-[#CDB7D9]/50 block">Fee</span> <span className="text-white">₹{changes.registrationFee}</span></div>
-                              <div><span className="text-[#CDB7D9]/50 block">Method</span> <span className="text-white capitalize">{changes.registrationMethod}</span></div>
-                              <div><span className="text-[#CDB7D9]/50 block">Poster</span> <a href={changes.poster} target="_blank" className="text-pink-400 hover:underline truncate block">{changes.poster}</a></div>
+                            <div className="space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[#CDB7D9]/20">
+                              <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Name</span> <span className="text-white text-lg font-medium">{changes.name}</span></div>
+
+                              <div>
+                                <span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Fee</span>
+                                <div className="text-white">
+                                  {fees.length > 0 ? fees.map((f, i) => (
+                                    <div key={i} className="flex gap-2">
+                                      <span className="capitalize text-[#CDB7D9]">{f.type}:</span>
+                                      <span>₹{f.fee}</span>
+                                    </div>
+                                  )) : "Free"}
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Type</span> <span className="text-white capitalize">{changes.eventType}</span></div>
+                                <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Method</span> <span className="text-white capitalize">{changes.registrationMethod}</span></div>
+                              </div>
+
+                              <div className="grid grid-cols-2 gap-4">
+                                <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Date</span> <span className="text-white">{changes.date}</span></div>
+                                <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Time</span> <span className="text-white">{changes.time}</span></div>
+                              </div>
+
+                              <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Venue</span> <span className="text-white">{changes.venue}</span></div>
+
+                              <div>
+                                <span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Description</span>
+                                <p className="text-white/80 whitespace-pre-wrap mt-1 text-xs">{changes.description || 'No description provided.'}</p>
+                              </div>
+
+                              {changes.registrationMethod === 'external' && (
+                                <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Reg Link</span> <a href={changes.registrationLink} target="_blank" className="text-blue-400 hover:underline break-all">{changes.registrationLink}</a></div>
+                              )}
+
+                              {changes.registrationMethod === 'internal' && changes.formFields && (
+                                <div>
+                                  <span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider mb-1">Form Fields</span>
+                                  <div className="flex flex-wrap gap-2">
+                                    {(() => {
+                                      try {
+                                        const fields = typeof changes.formFields === 'string' ? JSON.parse(changes.formFields) : changes.formFields;
+                                        return fields.map((f, i) => (
+                                          <span key={i} className="bg-[#CDB7D9]/10 border border-[#CDB7D9]/20 px-2 py-1 rounded text-xs text-[#CDB7D9]">{f.label}</span>
+                                        ));
+                                      } catch (e) { return <span className="text-red-400 text-xs">Error parsing fields</span> }
+                                    })()}
+                                  </div>
+                                </div>
+                              )}
+
+                              <div><span className="text-[#CDB7D9]/50 block text-xs uppercase tracking-wider">Poster</span>
+                                {changes.poster ? (
+                                  <a href={changes.poster} target="_blank" className="block mt-2 relative group overflow-hidden rounded-lg border border-[#CDB7D9]/20 w-32 aspect-[3/4]">
+                                    <img src={changes.poster} alt="Poster" className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                      <span className="text-white text-xs">View</span>
+                                    </div>
+                                  </a>
+                                ) : <span className="text-white/50 italic">No Poster</span>}
+                              </div>
                             </div>
                           )
                         })()}
@@ -1590,12 +1696,14 @@ export default function AdminDashboard() {
 
                 <div className="flex gap-4 pt-2">
                   <button
+                    type="button"
                     onClick={() => setShowRejectModal(false)}
                     className="flex-1 py-3 rounded-xl border border-[#CDB7D9]/20 text-[#CDB7D9] font-bold hover:bg-[#CDB7D9]/5 transition-all"
                   >
                     Cancel
                   </button>
                   <button
+                    type="button"
                     onClick={handleConfirmReject}
                     className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all shadow-[0_0_15px_rgba(239,68,68,0.3)]"
                   >
