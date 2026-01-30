@@ -317,7 +317,6 @@ export default function CoordinatorDashboard({ clubName }) {
         time: newEvent.time,
         registrationMethod: newEvent.registrationMethod,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
-        registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
         description: newEvent.description,
       }
@@ -449,7 +448,6 @@ export default function CoordinatorDashboard({ clubName }) {
         date: newEvent.date,
         time: newEvent.time,
         registrationMethod: newEvent.registrationMethod,
-        registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         registrationLink: newEvent.registrationMethod === 'external' ? newEvent.registrationLink : null,
         formFields: newEvent.registrationMethod === 'internal' ? JSON.stringify(formFields) : null,
         description: newEvent.description,
