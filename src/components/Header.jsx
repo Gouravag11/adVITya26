@@ -188,20 +188,21 @@ function Header() {
                                 {/* Right Side - Menu */}
                                 <div className="w-full lg:w-1/2 h-full flex flex-col justify-center items-center px-8 sm:px-16 md:px-24 pt-32 relative z-10 transition-all">
                                     {/* Centered Content Container */}
-                                    <div className="flex flex-col pt-20 pb-10 items-center justify-center w-full h-full">
-                                        <div className="flex flex-col items-center justify-between w-full h-full">
-                                            <div className="flex flex-col items-center gap-8 sm:gap-6 mb-12">
+                                    <div className="flex flex-col pt-20 pb-10 items-start justify-center w-full h-full pl-8 sm:pl-0">
+                                        <div className="flex flex-col items-start justify-between w-full h-full">
+                                            <div className="flex flex-col items-start gap-8 sm:gap-6 mb-12 w-full">
                                                 {navItems.map((item, index) => (
                                                     <motion.div
                                                         key={item.path}
                                                         initial={{ opacity: 0, x: 50 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: 0.1 + index * 0.1 }}
+                                                        className="w-full text-left"
                                                     >
                                                         <Link
                                                             to={item.path}
                                                             onClick={() => setIsOpen(false)}
-                                                            className={`text-4xl sm:text-5xl font-semibold text-[#CDB7D9] transition-opacity uppercase text-center block ${location.pathname === item.path ? 'opacity-100' : 'opacity-50 hover:opacity-70'}`}
+                                                            className={`text-4xl sm:text-5xl lg:text-7xl font-bold text-[#CDB7D9] transition-all duration-300 uppercase block hover:text-white hover:tracking-wide ${location.pathname === item.path ? 'opacity-100' : 'opacity-50 hover:opacity-100'}`}
                                                         >
                                                             {item.name}
                                                         </Link>
