@@ -33,8 +33,7 @@ const HeaderSpacer = ({ onHeightChange }) => {
 const SportCard = ({ sport, onReadMore }) => {
   return (
     <div
-      onClick={() => onReadMore(sport)}
-      className="bg-[#1A0A28] rounded-4xl p-2 border border-white/10 shadow-lg hover:border-purple-500/50 transition-all duration-300 group cursor-pointer"
+      className="bg-[#1A0A28] rounded-4xl p-2 border border-white/10 shadow-lg hover:border-purple-500/50 transition-all duration-300 group"
     >
       <div className="rounded-2xl overflow-hidden mb-4 h-48 bg-white/5 relative">
         <img
@@ -303,6 +302,10 @@ function Sportfest() {
         ? prev.filter((c) => c !== category)
         : [...prev, category]
     );
+  };
+
+  const handleCloseModal = () => {
+    setSelectedSport(null);
   };
 
   const filteredSports = useMemo(() => {
