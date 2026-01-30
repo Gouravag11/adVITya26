@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -16,6 +16,7 @@ import MusicTrigger from '../components/Home/MusicTrigger';
 import VolumeControl from '../components/Home/VolumeControl';
 import EventsSection from '../components/Home/EventsSection';
 import { Activity } from 'lucide-react';
+import PreLoader from "../components/PreLoader";
 gsap.registerPlugin(ScrollTrigger);
 
 
@@ -88,7 +89,7 @@ const floatAnimation = {
 
 export default function Home() {
 
-
+  const [showPreLoader, setShowPreLoader] = useState(true);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [volume, setVolume] = React.useState(0.5);
   const [isPlayerHovered, setIsPlayerHovered] = React.useState(false);
@@ -111,6 +112,14 @@ export default function Home() {
   const yearSelectionRef = React.useRef(null);
   const heroVideoRef = React.useRef(null);
   const pulseRef = React.useRef(null);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPreLoader(false);
+    }, 4000); // 4 seconds duration
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const [activeItem, setActiveItem] = useState(items[0]);
   React.useEffect(() => {
@@ -273,6 +282,8 @@ export default function Home() {
 
   return (
     <>
+
+      <PreLoader show={showPreLoader} />
       <div className="bg-[#12001A] w-screen relative">
         <div ref={pinnedRef} className="fixed inset-0 w-screen min-h-screen lg:h-screen px-4 sm:px-6 overflow-hidden z-0">
           {/* <SmokeOverlay variant="corners" /> */}
@@ -355,7 +366,7 @@ export default function Home() {
                     }}
                   />
 
-                  {/* <img src="/HomePage/Background.png" alt="BG" className='w-full h-full absolute shadow-lg rounded-4xl opacity-60' /> */}
+                  <img src="/HomePage/Background.png" alt="BG" className='w-full h-full absolute shadow-lg rounded-4xl opacity-30' />
 
                   <div className='hidden lg:flex w-96 h-full z-10 flex-col'>
                     <div className='w-full h-full max-h-[70%] flex py-6 px-4 flex-col relative'>
