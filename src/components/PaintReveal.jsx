@@ -74,7 +74,7 @@ const PaintReveal = ({ baseSrc, revealSrc, className }) => {
             <img
                 src={baseSrc}
                 alt="Base"
-                className="w-full h-full object-contain pointer-events-none" 
+                className="w-full h-full object-contain pointer-events-none"
                 style={{ display: 'block' }}
             />
             <canvas

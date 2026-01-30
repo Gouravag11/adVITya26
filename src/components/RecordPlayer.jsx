@@ -148,7 +148,7 @@ const RecordPlayer = ({ isPlaying, audioRef, isHovered, onTogglePlay }) => {
 
             {/* Rotating Record - larger size */}
             <img
-                src="/HomePage/Record.png"
+                src="/HomePage/Record3.png"
                 alt="Vinyl Record"
                 className="absolute"
                 style={{

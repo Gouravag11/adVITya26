@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 export default function NavButton({ children }) {
     return (
         <motion.button
-            className="relative px-6 py-1.5 text-sm rounded-full overflow-hidden border border-white/30 text-white cursor-pointer group"
+            className="relative px-6 py-1.5 text-sm rounded-full overflow-hidden border border-[#EFD2FF]/30 text-white cursor-pointer group"
             whileHover="hover"
             initial="initial"
         >

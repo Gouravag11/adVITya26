@@ -52,7 +52,7 @@ export default function VolumeControl({ volume, setVolume }) {
     const rotation = (volume * 120) - 60;
 
     return (
-        <div className='rounded-4xl bg-black w-full h-full relative flex flex-col justify-between p-8 overflow-hidden select-none'>
+        <div className='rounded-4xl bg-[#EFD2FF]/10 w-full h-full relative flex flex-col justify-between p-8 overflow-hidden select-none'>
             <div className="flex justify-end">
                 <div
                     className="w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-300"
@@ -69,7 +69,7 @@ export default function VolumeControl({ volume, setVolume }) {
                     onMouseDown={handleMouseDown}
                 >
                     <img
-                        src="/HomePage/SoundKnob.png"
+                        src="/HomePage/SoundKnob3.png"
                         alt="Volume Knob"
                         className="w-full h-full object-contain pointer-events-none"
                         style={{
@@ -82,7 +82,7 @@ export default function VolumeControl({ volume, setVolume }) {
 
             <div>
                 <h3 className="text-white text-xl font-bold mb-2 tracking-wide">VIBE CHECK</h3>
-                <p className="text-stone-500 text-[10px] leading-relaxed font-medium pr-4">
+                <p className="text-stone-400 text-[10px] leading-relaxed font-medium pr-4">
                     Adjust the atmosphere. Control the volume to immerse yourself in the AdVITya experience.
                 </p>
             </div>

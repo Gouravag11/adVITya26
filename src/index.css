@@ -40,6 +40,53 @@
    }
 }
 
+/* Price Range Slider in Events Page */
+.range-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  pointer-events: none;
+  appearance: none;
+  background: transparent;
+}
+
+.range-slider::-webkit-slider-thumb {
+  pointer-events: auto;
+  appearance: none;
+  height: 16px;
+  width: 16px;
+  background: #c084fc;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+.range-slider::-moz-range-thumb {
+  pointer-events: auto;
+  height: 16px;
+  width: 16px;
+  background: #c084fc;
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+
+/* Hide number input spinners for webkit-based browsers (Chrome, Safari, etc.) */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Hide number input spinners for Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="date"] {
+  color: aliceblue;
+}
+
+
 /* ============================================
    HOME PAGE STYLES
    ============================================ */
@@ -68,7 +115,7 @@
    top: 50%;
    left: 50%;
    transform: translate(-50%, -50%);
-   background: #262626;
+   background: #2a1f33;
    border-radius: 36px;
    padding: 4px;
 }
@@ -76,7 +123,7 @@
 .player-surface {
    width: 520px;
    height: 350px;
-   background: #c2c2c2;
+   background: #c9bdd4;
    border-radius: 32px;
    position: relative;
    overflow: hidden;
@@ -443,4 +490,3 @@
       transform: rotate(360deg);
    }
 }
-

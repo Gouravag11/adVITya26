@@ -30,7 +30,7 @@ function App() {
               <Route path="/sportfest" element={<Sportfest />} />
             </Routes>
           </main>
-          {/* <Footer /> */}
+          <Footer />
         </div>
       </Router>
     </ReactLenis>
