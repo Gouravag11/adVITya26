@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Header from '../components/Header';
 
 const HeaderSpacer = ({ onHeightChange }) => {
@@ -32,8 +32,11 @@ const HeaderSpacer = ({ onHeightChange }) => {
 
 const SportCard = ({ sport, onReadMore }) => {
   return (
-    <div className="bg-[#1A0A28] rounded-4xl p-2 border border-white/10 shadow-lg hover:border-purple-500/50 transition-all duration-300">
-      <div className="rounded-2xl overflow-hidden mb-4 h-48 bg-white/5">
+    <div
+      onClick={() => onReadMore(sport)}
+      className="bg-[#1A0A28] rounded-4xl p-2 border border-white/10 shadow-lg hover:border-purple-500/50 transition-all duration-300 group cursor-pointer"
+    >
+      <div className="rounded-2xl overflow-hidden mb-4 h-48 bg-white/5 relative">
         <img
           src={sport.image}
           alt={sport.name}
@@ -41,47 +44,49 @@ const SportCard = ({ sport, onReadMore }) => {
         />
       </div>
       <div className="p-5">
-        <h3 className="text-lg font-semibold text-white mb-1">
+        <h3 className="text-lg font-semibold text-white mb-1 font-poppins">
           {sport.name}
         </h3>
 
-        <p className="text-xs text-purple-300 mb-2 capitalize">
-          Sports Event
+        <p className="text-xs text-purple-300 mb-2 capitalize font-poppins">
+          {sport.category}
         </p>
 
-        <p className="text-xs text-gray-400 mb-1">
+        <p className="text-xs text-gray-400 mb-1 font-poppins">
           <span className="font-semibold">Format:</span>{' '}
           {sport.details[0].replace('Format: ', '')}
         </p>
 
-        <p className="text-xs text-gray-400 mb-1">
+        <p className="text-xs text-gray-400 mb-1 font-poppins">
           <span className="font-semibold">Venue:</span>{' '}
           Sports Complex
         </p>
 
-        <p className="text-xs text-gray-400 mb-3">
+        <p className="text-xs text-gray-400 mb-3 font-poppins">
           <span className="font-semibold">Date:</span>{' '}
           21 Feb 2025 • <span className="font-semibold">Time:</span>{' '}
           10:00 AM
         </p>
 
         <button
-          onClick={() => onReadMore(sport)}
-          className="w-full bg-purple-400/80 hover:bg-purple-400 transition text-black font-semibold py-3 rounded-xl"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(sport.registerLink, '_blank');
+          }}
+          className="w-full bg-purple-400/80 hover:bg-purple-400 transition text-black font-semibold py-3 rounded-xl font-poppins"
         >
-          Read More
+          Register Now
         </button>
       </div>
     </div>
   );
 };
 
-
 const SportModal = ({ sport, onClose, isMobile }) => {
   if (!sport) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center font-poppins">
       <div
         className="absolute inset-0 bg-black/80"
         onClick={onClose}
@@ -104,11 +109,6 @@ const SportModal = ({ sport, onClose, isMobile }) => {
                   alt={sport.name}
                   className="w-full h-48 object-cover"
                 />
-                <button className="absolute bottom-2 right-2 w-8 h-8 bg-white/20 backdrop-blur-sm rounded-lg flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                  </svg>
-                </button>
               </div>
 
               <h3 className="text-xl font-semibold text-white mb-2">
@@ -142,12 +142,6 @@ const SportModal = ({ sport, onClose, isMobile }) => {
                 </svg>
                 <span>Sports Complex</span>
               </div>
-              <div className="flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span>30 Left</span>
-              </div>
             </div>
 
             <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-xl p-4 mb-6">
@@ -168,31 +162,7 @@ const SportModal = ({ sport, onClose, isMobile }) => {
                     ))}
                   </ul>
                 </div>
-
-                <div>
-                  <h4 className="text-purple-400 font-semibold mb-2">FACULTY COORDINATORS</h4>
-                  <ul className="text-gray-300 text-sm">
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400">•</span>
-                      Sports Department
-                    </li>
-                  </ul>
-                </div>
-
-                <div>
-                  <h4 className="text-purple-400 font-semibold mb-2">STUDENT COORDINATORS</h4>
-                  <ul className="text-gray-300 text-sm space-y-1">
-                    <li className="flex items-start gap-2">
-                      <span className="text-purple-400">•</span>
-                      Sports Committee
-                    </li>
-                  </ul>
-                </div>
               </div>
-            </div>
-
-            <div className="mb-6">
-              <h4 className="text-gray-400 font-semibold mb-3">REGISTRATION TYPE</h4>
             </div>
 
             <div className="flex justify-end">
@@ -206,9 +176,6 @@ const SportModal = ({ sport, onClose, isMobile }) => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 REGISTER
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
               </a>
             </div>
           </div>
@@ -232,121 +199,16 @@ const SportSkeleton = () => (
 
 function Sportfest() {
   const [topOffset, setTopOffset] = useState(0);
-  const [isMobile, setIsMobile] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedSport, setSelectedSport] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [openFilter, setOpenFilter] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
-
-  const sportsData = [
-    {
-      id: 1,
-      name: 'Basket Ball',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb33500248607c462/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Knockout format',
-        'Players: max. 12 players per team',
-        'Playing time: 4 × 10 minutes (4 minutes overtime)',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc-R7jPrBoVX774SYupEFzTAD2Q7rADZRoWadE8rKJ7diLP_g/viewform',
-    },
-    {
-      id: 2,
-      name: 'Football',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb32a002aaa614c1e/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Knockout format',
-        'Players: max. 18 players & min 11 players per team',
-        'Playing time: two 30 minutes halves with 10 minutes rest',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSeA7Xly0LnZjcO86o6NOorO8_LhEiWHAALIYcO1Q8JLC3m0GQ/viewform',
-    },
-    {
-      id: 3,
-      name: 'Volleyball',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb54c00321a3e4544/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: League format',
-        'Players: 6 players per team',
-        'Playing time: Best of 3 sets with 25 points per set',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSf5AzN_Edc2IT01ylz9-SIOn8p9PiN2jXvdYCGvsEMpu-l7Dw/viewform',
-    },
-    {
-      id: 4,
-      name: 'Badminton',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb57a00175a1de88f/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Knockout format',
-        'Categories: Singles & Doubles',
-        'Playing time: Best of 3 matches, 21 points per match',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSes4RT3rEs-zXZ_wizH0M6mIjiuave0URxIhLGMjnwKJqqP5w/viewform',
-    },
-    {
-      id: 5,
-      name: 'Table Tennis',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb30e0033b253d393/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Knockout format',
-        'Categories: Singles & Doubles',
-        'Playing time: Best of 3 matches, 11 points per match',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSej5a1w7nq7BAGkb25Wb5L5IUyHAjpxoTiJG1JwhpNAiIykzw/viewform',
-    },
-    {
-      id: 6,
-      name: 'Cricket',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb6fb003c59f0213a/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: T20 League format',
-        'Players: max. 15 players per team',
-        'Playing time: 20 overs per side',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc5Me7mFTmHTSoq96gR5zdbOtlick7rFZXy7HMMQ4bsGMY4oA/viewform',
-    },
-    {
-      id: 7,
-      name: 'Kabaddi',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb31d00295744d0a6/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Knockout format',
-        'Players: max. 12 players per team',
-        'Playing time: 15 mins per half',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc9PDeGfMUrql-1SD1dtBenwR7kBTCvjzVBZEVqTvjQJJko7w/viewform',
-    },
-    {
-      id: 8,
-      name: 'Chess',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb6d4001524dd56a3/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        'Format: Individual knockout',
-        'Standard FIDE rules',
-        'Time control as per organizers',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc--ThbPH-pxbPjEuHAixAAUJjHEgkuf5JMCtGHzouZ1Frw-g/viewform',
-    },
-    {
-      id: 9,
-      name: 'Weightlifting',
-      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb301000e38f8535e/view?project=695eb843003ae5a0552b&mode=admin',
-      details: [
-        '2 attempts per lift',
-        'Entry fees as per category',
-        'Strict weight categories',
-      ],
-      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSf1CbTnSnjWObGXsZRJEwb9ZHeGM1aL9iH55f77b_94jz-8Ag/viewform',
-    },
-  ];
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth <= 1024;
-      setIsMobile(mobile);
-      setIsFilterOpen(!mobile);
+      setIsMobile(window.innerWidth < 768);
     };
 
     handleResize();
@@ -354,22 +216,107 @@ function Sportfest() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Mock Data with Categories
+  const sportsData = [
+    {
+      id: 1,
+      name: 'Basket Ball',
+      category: 'Team Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb33500248607c462/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Knockout format', 'Players: max. 12 players', 'Time: 4 × 10 mins'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc-R7jPrBoVX774SYupEFzTAD2Q7rADZRoWadE8rKJ7diLP_g/viewform',
+    },
+    {
+      id: 2,
+      name: 'Football',
+      category: 'Team Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb32a002aaa614c1e/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Knockout format', 'Players: 11 + subs', 'Time: 30 mins halves'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSeA7Xly0LnZjcO86o6NOorO8_LhEiWHAALIYcO1Q8JLC3m0GQ/viewform',
+    },
+    {
+      id: 3,
+      name: 'Volleyball',
+      category: 'Team Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb54c00321a3e4544/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: League format', 'Players: 6', 'Time: Best of 3 sets'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSf5AzN_Edc2IT01ylz9-SIOn8p9PiN2jXvdYCGvsEMpu-l7Dw/viewform',
+    },
+    {
+      id: 4,
+      name: 'Badminton',
+      category: 'Individual Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb57a00175a1de88f/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Knockout', 'Singles & Doubles', 'Time: Best of 3 matches'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSes4RT3rEs-zXZ_wizH0M6mIjiuave0URxIhLGMjnwKJqqP5w/viewform',
+    },
+    {
+      id: 5,
+      name: 'Table Tennis',
+      category: 'Individual Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb30e0033b253d393/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Knockout', 'Singles & Doubles', 'Time: Best of 3 matches'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSej5a1w7nq7BAGkb25Wb5L5IUyHAjpxoTiJG1JwhpNAiIykzw/viewform',
+    },
+    {
+      id: 6,
+      name: 'Cricket',
+      category: 'Team Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb6fb003c59f0213a/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: T20 League', 'Players: 11 + subs', 'Time: 20 overs'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc5Me7mFTmHTSoq96gR5zdbOtlick7rFZXy7HMMQ4bsGMY4oA/viewform',
+    },
+    {
+      id: 7,
+      name: 'Kabaddi',
+      category: 'Team Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb31d00295744d0a6/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Knockout', 'Players: 7 + subs', 'Time: 15 mins/half'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc9PDeGfMUrql-1SD1dtBenwR7kBTCvjzVBZEVqTvjQJJko7w/viewform',
+    },
+    {
+      id: 8,
+      name: 'Chess',
+      category: 'Individual Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb6d4001524dd56a3/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['Format: Individual', 'FIDE rules', 'Standard Time Control'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSc--ThbPH-pxbPjEuHAixAAUJjHEgkuf5JMCtGHzouZ1Frw-g/viewform',
+    },
+    {
+      id: 9,
+      name: 'Weightlifting',
+      category: 'Individual Sports',
+      image: 'https://fra.cloud.appwrite.io/v1/storage/buckets/696f8e35003b8cc96b50/files/696fb301000e38f8535e/view?project=695eb843003ae5a0552b&mode=admin',
+      details: ['2 attempts/lift', 'Entry fees apply', 'Strict weight cats'],
+      registerLink: 'https://docs.google.com/forms/d/e/1FAIpQLSf1CbTnSnjWObGXsZRJEwb9ZHeGM1aL9iH55f77b_94jz-8Ag/viewform',
+    },
+  ];
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
 
-  const filteredSports = sportsData.filter(sport =>
-    sport.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const handleReadMore = (sport) => {
-    setSelectedSport(sport);
+  const toggleCategory = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((c) => c !== category)
+        : [...prev, category]
+    );
   };
 
-  const handleCloseModal = () => {
-    setSelectedSport(null);
-  };
+  const filteredSports = useMemo(() => {
+    return sportsData.filter((sport) => {
+      const categoryMatch =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(sport.category);
+
+      const searchMatch =
+        sport.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return categoryMatch && searchMatch;
+    });
+  }, [selectedCategories, searchQuery]);
 
   return (
     <div
@@ -387,173 +334,205 @@ function Sportfest() {
       <HeaderSpacer onHeightChange={setTopOffset} />
 
       <main
-        className="relative min-h-screen text-white overflow-x-hidden"
-        style={{ paddingTop: topOffset + 16 }}
+        className="min-h-screen text-white"
+        style={{ paddingTop: topOffset }}
       >
-        {isMobile && isFilterOpen && (
-          <div
-            className="fixed inset-0 bg-black/60 z-30"
-            onClick={() => setIsFilterOpen(false)}
-          />
-        )}
-
-        <div className="px-4 sm:px-6 lg:px-8 grid grid-cols-12 gap-6">
-          <aside
-            className={`
-                            z-40 rounded-2xl py-4
-                            transition-transform duration-300 ease-in-out
-                            ${isMobile
-                ? `fixed left-0 top-1/2 -translate-y-1/2 w-80 px-6
-                                max-h-[85vh] overflow-y-auto
-                                ${isFilterOpen ? 'translate-x-0' : '-translate-x-full'}`
-                : 'col-span-12 lg:col-span-4 lg:sticky lg:top-24 self-start'}
-                        `}
-          >
-            <div className='flex flex-col items-center'>
-              <h1 className="text-4xl font-bold mb-6">SPORTS FEST</h1>
-
-              <p className="text-gray-300 mb-6 leading-relaxed text-center">
-                Dive into the heart of VIT Bhopal with AdVITya'26 — an electrifying blend of sports, energy, and competition. Crafted by the Sport Department of VIT Bhopal students.
+        {/* MOBILE LAYOUT */}
+        <div className="relative z-10 md:hidden">
+          <div className="px-[20px] py-[24px]">
+            {/* Title and Description */}
+            <div className="mb-[20px]">
+              <h1 className="text-[32px] font-semibold text-white mb-[12px] font-poppins leading-tight">
+                SPORTS FEST
+              </h1>
+              <p className="text-[13px] text-gray-300 font-poppins font-normal leading-relaxed">
+                Dive into the heart of VIT Bhopal with AdVITya'26 - an electrifying blend of sports, energy, and competition. Crafted by the Sport Department.
               </p>
             </div>
 
-            <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/10">
-              <div className="flex justify-between items-center p-4">
-                <span className="font-semibold tracking-wide">
-                  FILTERS
-                </span>
+            {/* Filter Bar */}
+            <div className="flex flex-col gap-[12px] mb-[24px]">
+              <div className="flex items-center gap-[16px] bg-[#1A0A28] border border-white/10 rounded-[8px] px-[16px] py-[10px] w-full">
                 <button
-                  onClick={() => {
-                    setSearchTerm('');
-                    setSelectedCategories([]);
-                  }}
-                  className="text-sm text-purple-400 hover:text-purple-300"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className={`relative flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] transition-all duration-300 font-poppins text-[13px] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
                 >
-                  Clear All
-                </button>
-              </div>
-
-              <div className="p-4">
-                <button
-                  onClick={() => setOpenFilter(openFilter === 'category' ? null : 'category')}
-                  className="w-full flex justify-between items-center font-medium"
-                >
-                  CATEGORY
-                  <span>{openFilter === 'category' ? '−' : '+'}</span>
+                  {isFilterOpen && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CDB7D9] rounded-full transition-all duration-300" />
+                  )}
+                  <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
                 </button>
 
-                {openFilter === 'category' && (
-                  <div className="mt-4 space-y-2 text-sm">
-                    {['Team Sports', 'Individual Sports'].map((t) => (
-                      <label key={t} className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedCategories.includes(t)}
-                          onChange={() => {
-                            setSelectedCategories(prev =>
-                              prev.includes(t)
-                                ? prev.filter(c => c !== t)
-                                : [...prev, t]
-                            );
-                          }}
-                          className="w-4 h-4 accent-purple-500"
-                        />
-                        <span>{t}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <button
-                  onClick={() => setOpenFilter(openFilter === 'sporttype' ? null : 'sporttype')}
-                  className="w-full flex justify-between items-center font-medium"
-                >
-                  SPORT TYPE
-                  <span>{openFilter === 'sporttype' ? '−' : '+'}</span>
-                </button>
-
-                {openFilter === 'sporttype' && (
-                  <div className="mt-4 space-y-2 text-sm">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={true}
-                        readOnly
-                        className="w-4 h-4 accent-purple-500"
-                      />
-                      <span>All Sports</span>
-                    </label>
-                  </div>
-                )}
-              </div>
-
-              <div className="p-4">
-                <input
-                  type="text"
-                  placeholder="Search sports..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-[#1A0A28] border border-white/10 rounded-xl px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-                />
-              </div>
-            </div>
-          </aside>
-
-          <section className="col-span-12 lg:col-span-8 h-full overflow-y-auto">
-            {isMobile && (
-              <div className="mb-4 flex flex-col gap-4">
-                <h1 className="text-3xl font-bold">SPORTS FEST</h1>
-                <p className="text-gray-400 text-sm">
-                  Dive into the heart of VIT Bhopal with AdVITya'26 — an electrifying blend of sports, energy, and competition.
-                </p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsFilterOpen(true)}
-                    className="bg-white/10 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    Filters
-                  </button>
-                  <button className="bg-white/10 border border-white/10 px-4 py-2 rounded-xl text-sm">
-                    Clear all
-                  </button>
-                  <button className="bg-white/10 border border-white/10 px-4 py-2 rounded-xl text-sm">
-                    Search
-                  </button>
-                  <button className="bg-white/10 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-                    </svg>
-                    Sort By
-                  </button>
+                <div className="flex-1 flex items-center gap-[6px] text-gray-400">
+                  <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search sports..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent border-none outline-none text-white w-full font-poppins text-[13px] placeholder-gray-400"
+                  />
                 </div>
               </div>
-            )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 p-25 pb-8">
+              {/* Filter Dropdown */}
+              {isFilterOpen && (
+                <div className="bg-[#1A0A28] border border-white/10 rounded-[8px] p-[16px] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
+                  <div>
+                    <div className="flex items-center justify-between mb-[10px]">
+                      <h4 className="text-[13px] font-semibold font-poppins text-white">CATEGORY</h4>
+                      <button
+                        onClick={() => {
+                          setSelectedCategories([]);
+                        }}
+                        className="text-[11px] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                    <div className="space-y-[8px]">
+                      {['Team Sports', 'Individual Sports'].map((t) => (
+                        <label key={t} className="flex items-center gap-[8px] cursor-pointer font-poppins">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategories.includes(t)}
+                            onChange={() => toggleCategory(t)}
+                            className="w-[16px] h-[16px] rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                          />
+                          <span className="capitalize text-[13px] text-gray-300 hover:text-white transition-colors">{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mobile Grid */}
+            <div className="grid grid-cols-1 gap-[20px]">
               {loading
-                ? Array.from({ length: 6 }).map((_, i) => (
-                  <SportSkeleton key={i} />
-                ))
+                ? Array.from({ length: 4 }).map((_, i) => <SportSkeleton key={i} />)
                 : filteredSports.length > 0
                   ? filteredSports.map((sport) => (
                     <SportCard
                       key={sport.id}
                       sport={sport}
-                      onReadMore={handleReadMore}
+                      onReadMore={setSelectedSport}
                     />
                   ))
                   : (
-                    <p className="text-gray-400 col-span-2">
-                      No sports match the search criteria.
-                    </p>
+                    <div className="text-center py-[60px]">
+                      <p className="text-gray-400 font-poppins text-[14px]">No sports match the selected filters.</p>
+                    </div>
                   )}
             </div>
-          </section>
+          </div>
+        </div>
+
+        {/* DESKTOP LAYOUT */}
+        <div className="relative z-10 hidden md:flex items-start">
+          <aside
+            className="w-[26vw] flex-shrink-0 p-[2vw] flex flex-col sticky"
+            style={{ top: topOffset }}
+          >
+            <div className="mb-[2vw]">
+              <h1 className="text-[3.5vw] font-semibold text-[#CDB7D9] mb-[1vw] font-poppins leading-tight">
+                SPORTS FEST
+              </h1>
+              <p className="text-[1.1vw] text-gray-300 font-poppins font-normal leading-relaxed">
+                Dive into the heart of VIT Bhopal with AdVITya'26 - an electrifying blend of sports, energy, and competition.
+              </p>
+            </div>
+
+            {/* Desktop Filter Bar */}
+            <div className="flex flex-col gap-[1vw]">
+              <div className="flex items-center gap-[1vw] bg-[#1A0A28] border border-white/10 rounded-[0.8vw] px-[0.8vw] py-[0.5vw] w-full">
+                <button
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className={`relative flex items-center gap-[0.3vw] px-[0.6vw] py-[0.3vw] rounded-[0.4vw] transition-all duration-300 font-poppins text-[0.85vw] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
+                >
+                  {isFilterOpen && (
+                    <div className="absolute bottom-0 left-0 right-0 h-[0.15vw] bg-[#CDB7D9] rounded-full transition-all duration-300" />
+                  )}
+                  <svg className="w-[0.9vw] h-[0.9vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filters
+                </button>
+
+                <div className="flex-1 flex items-center gap-[0.3vw] text-gray-400">
+                  <svg className="w-[0.85vw] h-[0.85vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    type="text"
+                    placeholder="Search sports..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="bg-transparent border-none outline-none text-white w-full font-poppins text-[0.85vw] placeholder-gray-400"
+                  />
+                </div>
+              </div>
+
+              {/* Desktop Filter Dropdown */}
+              {isFilterOpen && (
+                <div className="bg-[#1A0A28] border border-white/10 rounded-[0.8vw] p-[1.5vw] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
+                  <div>
+                    <div className="flex items-center justify-between mb-[0.8vw]">
+                      <h4 className="text-[0.9vw] font-semibold font-poppins text-white">CATEGORY</h4>
+                      <button
+                        onClick={() => {
+                          setSelectedCategories([]);
+                        }}
+                        className="text-[0.75vw] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                      >
+                        Clear all
+                      </button>
+                    </div>
+                    <div className="space-y-[0.5vw]">
+                      {['Team Sports', 'Individual Sports'].map((t) => (
+                        <label key={t} className="flex items-center gap-[0.5vw] cursor-pointer font-poppins">
+                          <input
+                            type="checkbox"
+                            checked={selectedCategories.includes(t)}
+                            onChange={() => toggleCategory(t)}
+                            className="w-[1vw] h-[1vw] rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                          />
+                          <span className="capitalize text-[0.9vw] text-gray-300 hover:text-white transition-colors">{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </aside>
+
+          {/* Right Content - Sports Grid */}
+          <div className="flex-1 p-[2vw]">
+            <div className="grid grid-cols-2 gap-[2vw] w-full max-w-[80vw] ml-auto">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => <SportSkeleton key={i} />)
+                : filteredSports.length > 0
+                  ? filteredSports.map((sport) => (
+                    <SportCard
+                      key={sport.id}
+                      sport={sport}
+                      onReadMore={setSelectedSport}
+                    />
+                  ))
+                  : (
+                    <div className="col-span-2 text-center py-[10vh]">
+                      <p className="text-gray-400 font-poppins text-[1.1vw]">No sports match the selected filters.</p>
+                    </div>
+                  )}
+            </div>
+          </div>
         </div>
       </main>
 

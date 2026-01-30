@@ -143,8 +143,8 @@ const EventsPage = () => {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [isSortOpen, setIsSortOpen] = useState(false);
     const [networkError, setNetworkError] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [minFee, setMinFee] = useState(0);
@@ -269,9 +269,13 @@ const EventsPage = () => {
                 fees.some((f) => Number(f.fee) >= minFee && Number(f.fee) <= maxFee) ||
                 fees.length === 0;
 
-            return categoryMatch && feeMatch;
+            const searchMatch =
+                event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.desc.toLowerCase().includes(searchQuery.toLowerCase());
+
+            return categoryMatch && feeMatch && searchMatch;
         });
-    }, [events, selectedCategories, minFee, maxFee]);
+    }, [events, selectedCategories, minFee, maxFee, searchQuery]);
 
     return (
         <>
@@ -313,64 +317,38 @@ const EventsPage = () => {
                                 EVENTS
                             </h1>
                             <p className="text-[13px] text-gray-300 font-poppins font-normal leading-relaxed">
-                                Dive into the heart of VIT Bhopal with AdVITya'25 - an electrifying blend of technology and culture. Crafted by the ingenious minds of VIT Bhopal students,
+                                Dive into the heart of VIT Bhopal with AdVITya'26 - an electrifying blend of technology and culture. Crafted by the ingenious minds of VIT Bhopal students,
                             </p>
                         </div>
 
                         {/* Filter Bar */}
                         <div className="flex flex-col gap-[12px] mb-[24px]">
-                            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-[8px] px-[16px] py-[10px] w-full">
-                                <div className="flex items-center gap-[16px]">
-                                    <button
-                                        onClick={() => {
-                                            setIsFilterOpen(!isFilterOpen);
-                                            if (!isFilterOpen) setIsSortOpen(false);
-                                        }}
-                                        className={`relative flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] transition-all duration-300 font-poppins text-[13px] ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
-                                    >
-                                        {isFilterOpen && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CDB7D9] rounded-full transition-all duration-300" />
-                                        )}
-                                        <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                        </svg>
-                                        Filters
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategories([]);
-                                            setMinFee(0);
-                                            setMaxFee(5000);
-                                        }}
-                                        className="flex items-center px-[12px] py-[6px] text-gray-400 hover:text-white transition-colors font-poppins text-[13px]"
-                                    >
-                                        Clear all
-                                    </button>
-
-                                    <div className="flex items-center gap-[6px] text-gray-400">
-                                        <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <span className="font-poppins text-[13px]">Search</span>
-                                    </div>
-                                </div>
-
+                            <div className="flex items-center gap-[16px] bg-white/5 border border-white/10 rounded-[8px] px-[16px] py-[10px] w-full">
                                 <button
-                                    onClick={() => {
-                                        setIsSortOpen(!isSortOpen);
-                                        if (!isSortOpen) setIsFilterOpen(false);
-                                    }}
-                                    className={`relative flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] transition-all duration-300 font-poppins text-[13px] whitespace-nowrap ${isSortOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`relative flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] transition-all duration-300 font-poppins text-[13px] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
                                 >
-                                    {isSortOpen && (
+                                    {isFilterOpen && (
                                         <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CDB7D9] rounded-full transition-all duration-300" />
                                     )}
                                     <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                     </svg>
-                                    Sort By
+                                    Filters
                                 </button>
+
+                                <div className="flex-1 flex items-center gap-[6px] text-gray-400">
+                                    <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-white w-full font-poppins text-[13px] placeholder-gray-400"
+                                    />
+                                </div>
                             </div>
 
                             {/* Filter Dropdown */}
@@ -378,7 +356,19 @@ const EventsPage = () => {
                                 <div className="bg-white/5 border border-white/10 rounded-[8px] p-[16px] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
                                     {/* Category Filter */}
                                     <div>
-                                        <h4 className="text-[13px] font-semibold mb-[10px] font-poppins text-white">CATEGORY</h4>
+                                        <div className="flex items-center justify-between mb-[10px]">
+                                            <h4 className="text-[13px] font-semibold font-poppins text-white">CATEGORY</h4>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedCategories([]);
+                                                    setMinFee(0);
+                                                    setMaxFee(5000);
+                                                }}
+                                                className="text-[11px] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                                            >
+                                                Clear all
+                                            </button>
+                                        </div>
                                         <div className="space-y-[8px]">
                                             {['technical', 'non-technical', 'cultural', 'workshop'].map((t) => (
                                                 <label key={t} className="flex items-center gap-[8px] cursor-pointer font-poppins">
@@ -437,58 +427,32 @@ const EventsPage = () => {
 
                         {/* Filter Bar - Single Horizontal Container */}
                         <div className="flex flex-col gap-[1vw]">
-                            <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-[0.8vw] px-[0.8vw] py-[0.5vw] w-full">
-                                <div className="flex items-center gap-[1vw]">
-                                    <button
-                                        onClick={() => {
-                                            setIsFilterOpen(!isFilterOpen);
-                                            if (!isFilterOpen) setIsSortOpen(false);
-                                        }}
-                                        className={`relative flex items-center gap-[0.3vw] px-[0.6vw] py-[0.3vw] rounded-[0.4vw] transition-all duration-300 font-poppins text-[0.85vw] ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
-                                    >
-                                        {isFilterOpen && (
-                                            <div className="absolute bottom-0 left-0 right-0 h-[0.15vw] bg-[#CDB7D9] rounded-full transition-all duration-300" />
-                                        )}
-                                        <svg className="w-[0.9vw] h-[0.9vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                                        </svg>
-                                        Filters
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            setSelectedCategories([]);
-                                            setMinFee(0);
-                                            setMaxFee(5000);
-                                        }}
-                                        className="flex items-center px-[0.6vw] py-[0.3vw] text-gray-400 hover:text-white transition-colors font-poppins text-[0.85vw]"
-                                    >
-                                        Clear
-                                    </button>
-
-                                    <div className="flex items-center gap-[0.3vw] text-gray-400">
-                                        <svg className="w-[0.85vw] h-[0.85vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                        </svg>
-                                        <span className="font-poppins text-[0.85vw]">Search</span>
-                                    </div>
-                                </div>
-
+                            <div className="flex items-center gap-[1vw] bg-white/5 border border-white/10 rounded-[0.8vw] px-[0.8vw] py-[0.5vw] w-full">
                                 <button
-                                    onClick={() => {
-                                        setIsSortOpen(!isSortOpen);
-                                        if (!isSortOpen) setIsFilterOpen(false);
-                                    }}
-                                    className={`relative flex items-center gap-[0.3vw] px-[0.6vw] py-[0.3vw] rounded-[0.4vw] transition-all duration-300 font-poppins text-[0.85vw] whitespace-nowrap ${isSortOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`relative flex items-center gap-[0.3vw] px-[0.6vw] py-[0.3vw] rounded-[0.4vw] transition-all duration-300 font-poppins text-[0.85vw] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
                                 >
-                                    {isSortOpen && (
+                                    {isFilterOpen && (
                                         <div className="absolute bottom-0 left-0 right-0 h-[0.15vw] bg-[#CDB7D9] rounded-full transition-all duration-300" />
                                     )}
                                     <svg className="w-[0.9vw] h-[0.9vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                                     </svg>
-                                    Sort By
+                                    Filters
                                 </button>
+
+                                <div className="flex-1 flex items-center gap-[0.3vw] text-gray-400">
+                                    <svg className="w-[0.85vw] h-[0.85vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-white w-full font-poppins text-[0.85vw] placeholder-gray-400"
+                                    />
+                                </div>
                             </div>
 
                             {/* Filter Dropdown */}
@@ -496,7 +460,19 @@ const EventsPage = () => {
                                 <div className="bg-white/5 border border-white/10 rounded-[0.8vw] p-[1.5vw] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
                                     {/* Category Filter */}
                                     <div>
-                                        <h4 className="text-[0.9vw] font-semibold mb-[0.8vw] font-poppins text-white">CATEGORY</h4>
+                                        <div className="flex items-center justify-between mb-[0.8vw]">
+                                            <h4 className="text-[0.9vw] font-semibold font-poppins text-white">CATEGORY</h4>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedCategories([]);
+                                                    setMinFee(0);
+                                                    setMaxFee(5000);
+                                                }}
+                                                className="text-[0.75vw] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                                            >
+                                                Clear all
+                                            </button>
+                                        </div>
                                         <div className="space-y-[0.5vw]">
                                             {['technical', 'non-technical', 'cultural', 'workshop'].map((t) => (
                                                 <label key={t} className="flex items-center gap-[0.5vw] cursor-pointer font-poppins">
