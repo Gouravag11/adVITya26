@@ -26,7 +26,7 @@ function Header() {
         { name: 'Events', path: '/events' },
         { name: 'Sports Fest', path: '/sportfest' },
         { name: 'Sponsor Us', path: '/sponsor' },
-        { name: 'Team', path: '/team' }
+        { name: 'About Us', path: '/team' }
     ];
 
     const { isHeaderOpen, openHeader, closeHeader, headerMode, setHeaderMode } = useUI();
@@ -39,7 +39,6 @@ function Header() {
     return (
         <>
             <motion.header
-                id="main-header"
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}

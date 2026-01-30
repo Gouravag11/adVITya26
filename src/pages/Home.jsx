@@ -14,7 +14,7 @@ import RevealText from '../components/Home/RevealText';
 import BookingCard from '../components/Home/BookingCard';
 import MusicTrigger from '../components/Home/MusicTrigger';
 import VolumeControl from '../components/Home/VolumeControl';
-
+import PreLoader from "../components/PreLoader";
 gsap.registerPlugin(ScrollTrigger);
 
 const containerVariants = {
@@ -49,7 +49,7 @@ const floatAnimation = {
 
 export default function Home() {
 
-
+  const [showPreLoader, setShowPreLoader] = useState(true);
   const [isPlaying, setIsPlaying] = React.useState(false);
   const [volume, setVolume] = React.useState(0.5);
   const [isPlayerHovered, setIsPlayerHovered] = React.useState(false);
@@ -69,6 +69,14 @@ export default function Home() {
   const scrollTextRef = React.useRef(null);
   const videoWrapperRef = React.useRef(null);
   const yearSelectionRef = React.useRef(null);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowPreLoader(false);
+    }, 4000); // 4 seconds duration
+
+    return () => clearTimeout(timer);
+  }, []);
 
   React.useEffect(() => {
     audioRef.current = new Audio("/HomePage/Music.mp3");
@@ -212,6 +220,8 @@ export default function Home() {
 
   return (
     <>
+    
+      <PreLoader show={showPreLoader} />
       <div className="bg-black w-screen relative">
         <div ref={pinnedRef} className="fixed inset-0 w-screen h-screen px-6 py-6 overflow-hidden z-0">
           <SmokeOverlay variant="corners" />

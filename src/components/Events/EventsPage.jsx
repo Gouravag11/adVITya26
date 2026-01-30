@@ -3,7 +3,10 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { databases } from '@/lib/appwrite';
-import { ID, Query } from 'appwrite';
+import { Query } from 'appwrite';
+
+import EventDetailModal from './EventDetailModal';
+
 /* -------------------------------------------------------------------------- */
 /*                         FIXED HEADER NO-ENTRY ZONE                          */
 /* -------------------------------------------------------------------------- */
@@ -27,7 +30,7 @@ const HeaderSpacer = ({ onHeightChange }) => {
 
     return (
         <div
-            className="fixed left-0 right-0 top-0 z-40 pointer-events-none bg-[#12001A]"
+            className="fixed left-0 right-0 top-0 z-40 pointer-events-none"
             style={{ height }}
             aria-hidden
         />
@@ -37,71 +40,94 @@ const HeaderSpacer = ({ onHeightChange }) => {
 /* -------------------------------------------------------------------------- */
 /*                                EVENT CARD                                  */
 /* -------------------------------------------------------------------------- */
-const EventCard = ({ event }) => {
-    const fees = Array.isArray(event.registrationFee)
-        ? event.registrationFee
-        : [];
-
-    const displayValue = (value) =>
-        value && value.trim() !== '' ? value : 'TBD';
-
+const EventCard = ({ event, onClick }) => {
     return (
-        <div className="bg-[#B7C9D91A] rounded-2xl p-4 border border-white/10 shadow-lg">
-            <div className="rounded-xl overflow-hidden mb-4 h-40 bg-white/5">
-                <img
-                    src={event.poster}
-                    alt={event.name}
-                    className="w-full h-full object-cover"
-                />
+        <div className="bg-[#1A0B2E]/60 backdrop-blur-sm rounded-[1.5vw] md:rounded-[1.5vw] sm:rounded-[12px] overflow-hidden border border-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer group">
+            {/* DESKTOP LAYOUT */}
+            <div className="hidden md:block">
+                <div className="relative h-[12vw] overflow-hidden">
+                    <img
+                        src={event.poster}
+                        alt={event.name}
+                        className="w-full h-full object-cover object-[50%_22%] group-hover:scale-[1.08] transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#1A0B2E] via-transparent to-transparent" />
+                </div>
+
+                <div className="p-[1.2vw]">
+                    <h3 className="text-[1.1vw] font-semibold text-white mb-[0.5vw] font-poppins">
+                        {event.name}
+                    </h3>
+
+                    <p className="text-[0.8vw] text-gray-400 mb-[1vw] line-clamp-2 font-poppins font-normal leading-relaxed">
+                        {event.desc}
+                    </p>
+
+                    <button
+                        onClick={onClick}
+                        className="w-full py-[0.8vw] rounded-[0.6vw] bg-[#CDB7D9] hover:bg-[#b89fc9] text-[#1A0B2E] font-semibold font-poppins transition-all duration-300 text-[0.8vw]"
+                    >
+                        Read More
+                    </button>
+                </div>
             </div>
 
-            <h3 className="text-lg font-semibold text-white mb-1">
-                {event.name}
-            </h3>
+            {/* MOBILE LAYOUT - Proper card with image on top */}
+            <div className="md:hidden flex flex-col">
+                <div className="relative h-[180px] overflow-hidden rounded-t-[12px]">
+                    <img
+                        src={event.poster}
+                        alt={event.name}
+                        className="w-full h-full object-cover group-hover:scale-[1.08] transition-transform duration-500"
+                    />
+                </div>
 
-            <p className="text-xs text-purple-300 mb-1 capitalize">
-                {event.eventType}
-            </p>
+                {/* Content below image */}
+                <div className="p-[16px] bg-[#1A0B2E]/60 backdrop-blur-sm rounded-b-[12px]">
+                    <h3 className="text-[16px] font-semibold text-white mb-[8px] font-poppins">
+                        {event.name}
+                    </h3>
 
-            <p className="text-xs text-gray-400 mb-1">
-                <span className="font-semibold">Venue:</span>{' '}
-                {displayValue(event.venue)}
-            </p>
+                    <p className="text-[12px] text-gray-300 mb-[12px] line-clamp-2 font-poppins font-normal leading-relaxed">
+                        {event.desc}
+                    </p>
 
-            <p className="text-xs text-gray-400 mb-1">
-                <span className="font-semibold">Date:</span>{' '}
-                {displayValue(event.date)} •{' '}
-                <span className="font-semibold">Time:</span>{' '}
-                {displayValue(event.time)}
-            </p>
-
-            <p className="text-xs text-green-400 mb-3">
-                {fees.map((f, i) => (
-                <span key={i}>
-                    {f.type}: ₹{f.fee}
-                    {i < fees.length - 1 ? ' | ' : ''}
-                </span>
-                ))}
-            </p>
-
-            <a
-                href={`/register/${event.$id}`}
-                className="flex w-full px-4 py-2 justify-center bg-[#CC95E9] hover:bg-[#aa4ade] transition text-black font-medium rounded-xl cursor-pointer">
-                Read More
-            </a>
+                    <button
+                        onClick={onClick}
+                        className="w-full py-[12px] rounded-[8px] bg-[#CDB7D9] hover:bg-[#b89fc9] text-[#1A0B2E] font-semibold font-poppins transition-all duration-300 text-[14px]"
+                    >
+                        Read More
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
 
-
-
 /* ---------------------------- LOADING SKELETON ----------------------------- */
 const EventSkeleton = () => (
-    <div className="bg-[#B7C9D91A] rounded-2xl p-4 border border-white/10 animate-pulse">
-        <div className="h-40 bg-white/10 rounded-xl mb-4" />
-        <div className="h-4 bg-white/10 rounded w-3/4 mb-2" />
-        <div className="h-3 bg-white/10 rounded w-1/2 mb-4" />
-        <div className="h-9 bg-white/10 rounded" />
+    <div className="bg-[#1A0B2E]/60 rounded-[1.5vw] md:rounded-[1.5vw] sm:rounded-[12px] overflow-hidden border border-white/10 animate-pulse">
+        {/* DESKTOP SKELETON */}
+        <div className="hidden md:block">
+            <div className="h-[12vw] bg-white/10" />
+            <div className="p-[1.2vw]">
+                <div className="h-[1.5vw] bg-white/10 rounded w-3/4 mb-[0.8vw]" />
+                <div className="h-[1vw] bg-white/10 rounded w-full mb-[0.5vw]" />
+                <div className="h-[1vw] bg-white/10 rounded w-2/3 mb-[1vw]" />
+                <div className="h-[2.5vw] bg-white/10 rounded" />
+            </div>
+        </div>
+
+        {/* MOBILE SKELETON */}
+        <div className="md:hidden flex flex-col">
+            <div className="h-[180px] bg-white/10 rounded-t-[12px]" />
+            <div className="p-[16px] bg-[#1A0B2E]/60 rounded-b-[12px]">
+                <div className="h-[20px] bg-white/10 rounded w-3/4 mb-[8px]" />
+                <div className="h-[14px] bg-white/10 rounded w-full mb-[6px]" />
+                <div className="h-[14px] bg-white/10 rounded w-2/3 mb-[12px]" />
+                <div className="h-[40px] bg-white/10 rounded" />
+            </div>
+        </div>
     </div>
 );
 
@@ -115,15 +141,15 @@ const STEP = 50;
 const EventsPage = () => {
     const [topOffset, setTopOffset] = useState(0);
     const [events, setEvents] = useState([]);
-
-    const [isMobile, setIsMobile] = useState(true);
+    const [selectedEvent, setSelectedEvent] = useState(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [networkError, setNetworkError] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [minFee, setMinFee] = useState(0);
     const [maxFee, setMaxFee] = useState(5000);
 
-    const [openFilter, setOpenFilter] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
@@ -132,34 +158,72 @@ const EventsPage = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
+            if (!DATABASE_ID || DATABASE_ID === 'your_database_id' || !EVENTS_COLLECTION_ID) {
+                console.warn('Appwrite not configured. Missing variables:', {
+                    DATABASE_ID,
+                    EVENTS_COLLECTION_ID,
+                    VITE_APPWRITE_DATABASE_ID: import.meta.env.VITE_APPWRITE_DATABASE_ID,
+                    VITE_APPWRITE_EVENTS_COLLECTION_ID: import.meta.env.VITE_APPWRITE_EVENTS_COLLECTION_ID
+                });
+                setEvents([]);
+                setLoading(false);
+                return;
+            }
+
+            console.debug("Fetching Events with:", {
+                DB_ID: DATABASE_ID,
+                COLLECTION_ID: EVENTS_COLLECTION_ID,
+            });
+
             const [eventsRes] = await Promise.all([
                 databases.listDocuments(DATABASE_ID, EVENTS_COLLECTION_ID, [Query.limit(100)]),
             ]);
-    
-            let eventsData = eventsRes.documents.map(event => {
-                let registrationFee = [{ type: '', fee: '' }]; // default
-        
-                if (event.registrationFee) {
-                if (Array.isArray(event.registrationFee)) {
-                    registrationFee = event.registrationFee;
-                } else {
+
+            if (eventsRes.documents.length > 0) {
+                console.log("Raw Event Data Keys:", Object.keys(eventsRes.documents[0]));
+                console.log("Raw Event Data Sample:", eventsRes.documents[0]);
+            }
+
+            let eventsData = eventsRes.documents.map(events => {
+                const safeArrayParse = (data) => {
+                    if (!data) return [];
+                    if (Array.isArray(data)) return data;
                     try {
-                    registrationFee = JSON.parse(event.registrationFee);
-                    } catch (err) {
-                    console.warn('Failed to parse registrationFee:', event.registrationFee, err);
+                        const parsed = JSON.parse(data);
+                        return Array.isArray(parsed) ? parsed : [];
+                    } catch {
+                        return [];
                     }
-                }
-                }
-        
+                };
+
                 return {
-                ...event,
-                registrationFee
+                    ...events,
+                    name: events.name || events.eventName || "Untitled Event",
+                    desc: events.description || "Join us for this amazing event! More details coming soon.",
+                    eventType: events.eventType || "general",
+                    date: events.date || "TBA",
+                    time: events.time || "TBA",
+                    venue: events.venue || "TBA",
+                    club: events.clubId || "General",
+                    poster: events.poster
+                        ? (events.poster.startsWith('http')
+                            ? events.poster
+                            : `${import.meta.env.VITE_APPWRITE_ENDPOINT}/storage/buckets/${import.meta.env.VITE_APPWRITE_BUCKET_ID}/files/${events.poster}/view?project=${import.meta.env.VITE_APPWRITE_PROJECT_ID}`)
+                        : "https://placehold.co/800x600/2A1A3E/FFF?text=Coming+Soon",
+                    registrationFee: safeArrayParse(events.registrationFee),
+                    features: safeArrayParse(events.features),
+                    facultyCoordinators: safeArrayParse(events.facultyCoordinators),
+                    studentCoordinators: safeArrayParse(events.studentCoordinators),
                 };
             });
             setEvents(eventsData);
-    
+
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching data from Appwrite:", error);
+            if (error.message.includes('Failed to fetch') || error.message.includes('Network request failed')) {
+                setNetworkError(true);
+            }
+            setEvents([]);
         } finally {
             setLoading(false);
         }
@@ -167,23 +231,20 @@ const EventsPage = () => {
 
     useEffect(() => {
         fetchData();
-    }, []);
 
-    useEffect(() => {
-        const handleResize = () => {
-            const mobile = window.innerWidth <= 1024;
-            setIsMobile(mobile);
-            setIsFilterOpen(!mobile);
+        const handleOnline = () => {
+            setNetworkError(false);
+            fetchData();
         };
+        const handleOffline = () => setNetworkError(true);
 
-        handleResize();
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setLoading(false), 1200);
-        return () => clearTimeout(timer);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
     }, []);
 
     const toggleCategory = (category) => {
@@ -197,216 +258,272 @@ const EventsPage = () => {
     const filteredEvents = useMemo(() => {
         return events.filter((event) => {
             const categoryMatch =
-            selectedCategories.length === 0 ||
-            selectedCategories.includes(event.eventType);
+                selectedCategories.length === 0 ||
+                selectedCategories.includes(event.eventType);
 
             const fees = Array.isArray(event.registrationFee)
-            ? event.registrationFee
-            : [];
+                ? event.registrationFee
+                : [];
 
             const feeMatch =
-            fees.some((f) => Number(f.fee) >= minFee && Number(f.fee) <= maxFee) ||
-            fees.length === 0;
+                fees.some((f) => Number(f.fee) >= minFee && Number(f.fee) <= maxFee) ||
+                fees.length === 0;
 
-            return categoryMatch && feeMatch;
+            const searchMatch =
+                event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                event.desc.toLowerCase().includes(searchQuery.toLowerCase());
+
+            return categoryMatch && feeMatch && searchMatch;
         });
-    }, [events, selectedCategories, minFee, maxFee]);
-
-    
+    }, [events, selectedCategories, minFee, maxFee, searchQuery]);
 
     return (
         <>
             <HeaderSpacer onHeightChange={setTopOffset} />
 
             <main
-                className="fixed inset-x-0 bottom-0 bg-[#12001A] text-white overflow-x-hidden items-center"
-                style={{ top: topOffset }}
+                className="min-h-screen bg-[#0F041C] text-white"
+                style={{ paddingTop: topOffset }}
             >
-                {isMobile && isFilterOpen && (
-                    <div
-                        className="fixed inset-0 bg-black/60 z-30"
-                        onClick={() => setIsFilterOpen(false)}
-                    />
+                {/* Network Error Alert */}
+                {networkError && (
+                    <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-500/90 text-white px-6 py-3 rounded-full shadow-lg backdrop-blur-md flex items-center gap-3 animate-fadeIn">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="font-poppins text-sm font-medium">Unable to connect. Please check your internet connection.</span>
+                        <button
+                            onClick={() => { setNetworkError(false); fetchData(); }}
+                            className="bg-white/20 hover:bg-white/30 rounded-full p-1 transition-colors ml-2"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
                 )}
 
-                <div className="h-full px-4 sm:px-6 lg:px-8 pt-4 grid grid-cols-12 gap-6 overflow-y-auto overflow-x-hidden">
-                    <aside
-                        className={`
-                            z-40 rounded-2xl py-4
-                            transition-transform duration-300 ease-in-out
-                            ${isMobile
-                                ? `fixed left-0 top-1/2 -translate-y-1/2 w-80 px-6
-                                max-h-[85vh] overflow-y-auto
-                                ${isFilterOpen ? 'translate-x-0' : '-translate-x-full'}`
-                                : 'col-span-12 lg:col-span-4 sticky top-10 self-start'}
-                        `}
-                    >
-                        <div className='flex flex-col items-center'>
-                            <h1 className="text-4xl font-bold mb-6">Events</h1>
+                {/* Background Pattern */}
+                <div className="fixed inset-0 pointer-events-none z-0">
+                    <img src="/Herosection_BG.svg" alt="" className="w-full h-full object-cover opacity-20" />
+                </div>
 
-                            <p className="text-gray-300 mb-6 leading-relaxed">
-                                Dive into the heart of VIT Bhopal with Advitya'25 — an
-                                electrifying blend of technology and culture.
+                {/* MOBILE LAYOUT */}
+                <div className="relative z-10 md:hidden">
+                    <div className="px-[20px] py-[24px]">
+                        {/* Title and Description */}
+                        <div className="mb-[20px]">
+                            <h1 className="text-[32px] font-semibold text-white mb-[12px] font-poppins leading-tight">
+                                EVENTS
+                            </h1>
+                            <p className="text-[13px] text-gray-300 font-poppins font-normal leading-relaxed">
+                                Dive into the heart of VIT Bhopal with AdVITya'26 - an electrifying blend of technology and culture. Crafted by the ingenious minds of VIT Bhopal students,
                             </p>
                         </div>
-                        
-                        <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/10">
-                            <div className="flex justify-between items-center p-4">
-                                <span className="font-semibold tracking-wide">
-                                    FILTERS
-                                </span>
+
+                        {/* Filter Bar */}
+                        <div className="flex flex-col gap-[12px] mb-[24px]">
+                            <div className="flex items-center gap-[16px] bg-white/5 border border-white/10 rounded-[8px] px-[16px] py-[10px] w-full">
                                 <button
-                                    onClick={() => {
-                                        setSelectedCategories([]);
-                                        setMinFee(0);
-                                        setMaxFee(5000);
-                                    }}
-                                    className="text-sm text-purple-400 hover:text-purple-300"
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`relative flex items-center gap-[6px] px-[12px] py-[6px] rounded-[6px] transition-all duration-300 font-poppins text-[13px] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
                                 >
-                                    Clear All
+                                    {isFilterOpen && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-[#CDB7D9] rounded-full transition-all duration-300" />
+                                    )}
+                                    <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    Filters
                                 </button>
+
+                                <div className="flex-1 flex items-center gap-[6px] text-gray-400">
+                                    <svg className="w-[14px] h-[14px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-white w-full font-poppins text-[13px] placeholder-gray-400"
+                                    />
+                                </div>
                             </div>
 
-                            {/* CATEGORY */}
-                            <div className="p-4">
-                                <button
-                                    onClick={() =>
-                                        setOpenFilter(openFilter === 'category' ? null : 'category')
-                                    }
-                                    className="w-full flex justify-between items-center font-medium"
-                                >
-                                    CATEGORY
-                                    <span>{openFilter === 'category' ? '−' : '+'}</span>
-                                </button>
-
-                                {openFilter === 'category' && (
-                                    <div className="mt-4 space-y-2 text-sm">
-                                        {['technical', 'non-technical'].map((t) => (
-                                            <label key={t} className="flex items-center gap-2">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedCategories.includes(t)}
-                                                    onChange={() => toggleCategory(t)}
-                                                />
-                                                <span className="capitalize">{t}</span>
-                                            </label>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* PRICE RANGE */}
-                            <div className="p-4">
-                                <button
-                                    onClick={() =>
-                                        setOpenFilter(openFilter === 'price' ? null : 'price')
-                                    }
-                                    className="w-full flex justify-between items-center font-medium"
-                                >
-                                    PRICE RANGE
-                                    <span>{openFilter === 'price' ? '−' : '+'}</span>
-                                </button>
-
-                                {openFilter === 'price' && (
-                                    <div className="mt-6 relative">
-                                        {/* Track */}
-                                        <div className="relative h-2 bg-white/10 rounded">
-                                            <div
-                                                className="absolute h-2 bg-purple-400 rounded"
-                                                style={{
-                                                    left: `${(minFee / MAX_PRICE) * 100}%`,
-                                                    right: `${100 - (maxFee / MAX_PRICE) * 100}%`,
+                            {/* Filter Dropdown */}
+                            {isFilterOpen && (
+                                <div className="bg-white/5 border border-white/10 rounded-[8px] p-[16px] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
+                                    {/* Category Filter */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-[10px]">
+                                            <h4 className="text-[13px] font-semibold font-poppins text-white">CATEGORY</h4>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedCategories([]);
+                                                    setMinFee(0);
+                                                    setMaxFee(5000);
                                                 }}
-                                            />
+                                                className="text-[11px] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                                            >
+                                                Clear all
+                                            </button>
                                         </div>
-
-                                        {/* Min thumb */}
-                                        <input
-                                            type="range"
-                                            min={MIN_PRICE}
-                                            max={MAX_PRICE}
-                                            step={STEP}
-                                            value={minFee}
-                                            onChange={(e) =>
-                                                setMinFee(Math.min(+e.target.value, maxFee - STEP))
-                                            }
-                                            className="range-slider z-20 -translate-y-9"
-                                        />
-
-                                        {/* Max thumb */}
-                                        <input
-                                            type="range"
-                                            min={MIN_PRICE}
-                                            max={MAX_PRICE}
-                                            step={STEP}
-                                            value={maxFee}
-                                            onChange={(e) =>
-                                                setMaxFee(Math.max(+e.target.value, minFee + STEP))
-                                            }
-                                            className="range-slider z-10 -translate-y-9"
-                                        />
-
-                                        {/* Inputs */}
-                                        <div className="flex gap-3 text-sm mt-4">
-                                            <input
-                                                type="number"
-                                                value={minFee}
-                                                onChange={(e) =>
-                                                    setMinFee(Math.min(+e.target.value, maxFee))
-                                                }
-                                                className="w-full bg-[#1F1F1F] border border-white/10 rounded px-2 py-1"
-                                            />
-                                            <span className="self-center">–</span>
-                                            <input
-                                                type="number"
-                                                value={maxFee}
-                                                onChange={(e) =>
-                                                    setMaxFee(Math.max(+e.target.value, minFee))
-                                                }
-                                                className="w-full bg-[#1F1F1F] border border-white/10 rounded px-2 py-1"
-                                            />
+                                        <div className="space-y-[8px]">
+                                            {['technical', 'non-technical', 'cultural', 'workshop'].map((t) => (
+                                                <label key={t} className="flex items-center gap-[8px] cursor-pointer font-poppins">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedCategories.includes(t)}
+                                                        onChange={() => toggleCategory(t)}
+                                                        className="w-[16px] h-[16px] rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                                                    />
+                                                    <span className="capitalize text-[13px] text-gray-300 hover:text-white transition-colors">{t}</span>
+                                                </label>
+                                            ))}
                                         </div>
-
-                                        <p className="mt-2 text-xs text-white/60">
-                                            ₹{minFee} – ₹{maxFee}
-                                        </p>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
-                    </aside>
 
-                    <section className="col-span-12 lg:col-span-8 h-full overflow-y-auto">
-                        {isMobile && (
-                            <button
-                                onClick={() => setIsFilterOpen(true)}
-                                className="mb-4 bg-white/10 border border-white/10 px-4 py-2 rounded-xl"
-                            >
-                                Open Filters
-                            </button>
-                        )}
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        {/* Events Grid - Mobile */}
+                        <div className="grid grid-cols-1 gap-[20px]">
                             {loading
-                                ? Array.from({ length: 6 }).map((_, i) => (
-                                    <EventSkeleton key={i} />
-                                ))
+                                ? Array.from({ length: 4 }).map((_, i) => <EventSkeleton key={i} />)
                                 : filteredEvents.length > 0
                                     ? filteredEvents.map((event) => (
                                         <EventCard
                                             key={event.$id}
                                             event={event}
+                                            onClick={() => setSelectedEvent(event)}
                                         />
                                     ))
                                     : (
-                                        <p className="text-gray-400">
-                                            No events match the selected filters.
-                                        </p>
+                                        <div className="text-center py-[60px]">
+                                            <p className="text-gray-400 font-poppins text-[14px]">No events match the selected filters.</p>
+                                        </div>
                                     )}
                         </div>
-                    </section>
+                    </div>
+                </div>
+
+                {/* DESKTOP LAYOUT */}
+                <div className="relative z-10 hidden md:flex items-start">
+                    {/* Left Sidebar */}
+                    <aside
+                        className="w-[26vw] flex-shrink-0 p-[2vw] flex flex-col sticky"
+                        style={{ top: topOffset }}
+                    >
+                        {/* Title and Description */}
+                        <div className="mb-[2vw]">
+                            <h1 className="text-[3.5vw] font-semibold text-[#CDB7D9] mb-[1vw] font-poppins leading-tight">
+                                EVENTS
+                            </h1>
+                            <p className="text-[1.1vw] text-gray-300 font-poppins font-normal leading-relaxed">
+                                Dive into the heart of VIT Bhopal with AdVITya'25 - an electrifying blend of technology and culture. Crafted by the ingenious minds of VIT Bhopal students,
+                            </p>
+                        </div>
+
+                        {/* Filter Bar - Single Horizontal Container */}
+                        <div className="flex flex-col gap-[1vw]">
+                            <div className="flex items-center gap-[1vw] bg-white/5 border border-white/10 rounded-[0.8vw] px-[0.8vw] py-[0.5vw] w-full">
+                                <button
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className={`relative flex items-center gap-[0.3vw] px-[0.6vw] py-[0.3vw] rounded-[0.4vw] transition-all duration-300 font-poppins text-[0.85vw] flex-shrink-0 ${isFilterOpen ? 'text-white bg-white/10' : 'text-gray-300 hover:text-white'}`}
+                                >
+                                    {isFilterOpen && (
+                                        <div className="absolute bottom-0 left-0 right-0 h-[0.15vw] bg-[#CDB7D9] rounded-full transition-all duration-300" />
+                                    )}
+                                    <svg className="w-[0.9vw] h-[0.9vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    Filters
+                                </button>
+
+                                <div className="flex-1 flex items-center gap-[0.3vw] text-gray-400">
+                                    <svg className="w-[0.85vw] h-[0.85vw]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="bg-transparent border-none outline-none text-white w-full font-poppins text-[0.85vw] placeholder-gray-400"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Filter Dropdown */}
+                            {isFilterOpen && (
+                                <div className="bg-white/5 border border-white/10 rounded-[0.8vw] p-[1.5vw] overflow-hidden transition-all duration-300 ease-in-out animate-slideDown">
+                                    {/* Category Filter */}
+                                    <div>
+                                        <div className="flex items-center justify-between mb-[0.8vw]">
+                                            <h4 className="text-[0.9vw] font-semibold font-poppins text-white">CATEGORY</h4>
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedCategories([]);
+                                                    setMinFee(0);
+                                                    setMaxFee(5000);
+                                                }}
+                                                className="text-[0.75vw] text-[#CDB7D9] hover:text-white transition-colors font-poppins font-medium"
+                                            >
+                                                Clear all
+                                            </button>
+                                        </div>
+                                        <div className="space-y-[0.5vw]">
+                                            {['technical', 'non-technical', 'cultural', 'workshop'].map((t) => (
+                                                <label key={t} className="flex items-center gap-[0.5vw] cursor-pointer font-poppins">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedCategories.includes(t)}
+                                                        onChange={() => toggleCategory(t)}
+                                                        className="w-[1vw] h-[1vw] rounded border-white/20 bg-white/5 text-purple-500 focus:ring-purple-500 focus:ring-offset-0"
+                                                    />
+                                                    <span className="capitalize text-[0.9vw] text-gray-300 hover:text-white transition-colors">{t}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </aside>
+
+                    {/* Right Content - Events Grid */}
+                    <div className="flex-1 p-[2vw]">
+                        <div className="grid grid-cols-2 gap-[2vw] w-full max-w-[80vw] ml-auto">
+                            {loading
+                                ? Array.from({ length: 4 }).map((_, i) => <EventSkeleton key={i} />)
+                                : filteredEvents.length > 0
+                                    ? filteredEvents.map((event) => (
+                                        <EventCard
+                                            key={event.$id}
+                                            event={event}
+                                            onClick={() => setSelectedEvent(event)}
+                                        />
+                                    ))
+                                    : (
+                                        <div className="col-span-2 text-center py-[10vh]">
+                                            <p className="text-gray-400 font-poppins text-[1.1vw]">No events match the selected filters.</p>
+                                        </div>
+                                    )}
+                        </div>
+                    </div>
                 </div>
             </main>
+
+            {/* Event Detail Modal */}
+            {selectedEvent && (
+                <EventDetailModal
+                    event={selectedEvent}
+                    onClose={() => setSelectedEvent(null)}
+                />
+            )}
+
+
         </>
     );
 };
