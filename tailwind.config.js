@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'radial-gradient': 'radial-gradient(var(--tw-gradient-stops))',
+      },
       keyframes: {
         slideInRight: {
           '0%': { transform: 'translateX(100%)', opacity: '0' },
@@ -19,6 +22,10 @@ export default {
       animation: {
         slideInRight: 'slideInRight 0.3s ease-out forwards',
         slideOutRight: 'slideOutRight 0.25s ease-in forwards',
+      },
+      fontFamily: {
+        'abril': ['"Abril Fatface"', 'cursive'],
+        'ballet': ['"Ballet"', 'cursive'],
       },
     },
   },

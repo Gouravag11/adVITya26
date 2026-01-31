@@ -47,13 +47,13 @@ function Team() {
   };
 
   const vps = [
-    { name: 'Mr. Sankar Viswanathan', role: 'Vice President', image: '/VP.jpg' },
-    { name: 'Mrs. Kadhambari S Viswanathan', role: 'Assistant Vice President', image: '/AVP.jpg' },
+    { name: 'Mr. Sankar Viswanathan', role: 'Vice President', image: 'Images/VP.jpg' },
+    { name: 'Mrs. Kadhambari S Viswanathan', role: 'Assistant Vice President', image: 'Images/AVP.jpg' },
   ];
 
   const others = [
-    { name: 'Prof. T. B. Sridharan', role: 'Pro-Vice Chancellor', image: '/Pro_VC.jpg' },
-    { name: 'Mr. K. K. Nair', role: 'Acting Registrar', image: '/Registrar.jpg' },
+    { name: 'Prof. T. B. Sridharan', role: 'Pro-Vice Chancellor', image: 'Images/Pro_VC.jpg' },
+    { name: 'Mr. K. K. Nair', role: 'Acting Registrar', image: 'Images/Registrar.jpg' },
   ];
 
   /* -------- APPWRITE DATA -------- */

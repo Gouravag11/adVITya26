@@ -1,29 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-// Background Vector Component - Simplified for performance/token limits but maintaining aesthetic
-const BgVector = () => {
-    return (
-        <svg className="w-full h-full object-cover text-[#b388ff]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
-            <defs>
-                <pattern id="grid-pattern" width="10" height="10" patternUnits="userSpaceOnUse">
-                    <path d="M 10 0 L 0 0 0 10" fill="none" stroke="currentColor" strokeWidth="0.5" strokeOpacity="0.2" />
-                </pattern>
-                <linearGradient id="fade-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                    <stop offset="0%" stopColor="#130722" stopOpacity="0" />
-                    <stop offset="50%" stopColor="#130722" stopOpacity="0.5" />
-                    <stop offset="100%" stopColor="#130722" stopOpacity="1" />
-                </linearGradient>
-            </defs>
-            <rect width="100" height="100" fill="url(#grid-pattern)" opacity="0.3" />
-            {/* Decorative circles */}
-            <circle cx="20" cy="20" r="15" stroke="currentColor" strokeWidth="0.2" strokeOpacity="0.1" />
-            <circle cx="80" cy="80" r="25" stroke="currentColor" strokeWidth="0.2" strokeOpacity="0.1" />
-            <path d="M0 100 L100 0" stroke="currentColor" strokeWidth="0.2" strokeOpacity="0.1" />
-        </svg>
-    );
-};
-
 const Countdown = () => {
     const [timeLeft, setTimeLeft] = useState({
         days: "00",
@@ -68,7 +45,7 @@ const Countdown = () => {
                     const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
                     setTimeLeft({
-                        days: days.toString().padStart(2, "0"),
+                        days: days.toString(),
                         hours: hours.toString().padStart(2, "0"),
                         minutes: minutes.toString().padStart(2, "0"),
                         seconds: seconds.toString().padStart(2, "0"),
@@ -82,7 +59,7 @@ const Countdown = () => {
             countdownInterval = setInterval(updateTimer, 1000);
         };
 
-        // Run Scramble for 2.5 seconds, then switch to real time
+        // Run Scramble for 2 seconds, then switch to real time
         startScramble();
         const timer = setTimeout(() => {
             startCountdown();
@@ -95,62 +72,72 @@ const Countdown = () => {
         };
     }, []);
 
-    const TimeUnit = ({ value, label }) => (
-        <div className="flex flex-col items-center mx-2 sm:mx-4">
-            <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative px-3 sm:px-6 py-2 sm:py-4 bg-[#130722] ring-1 ring-gray-900/5 rounded-lg leading-none flex items-center justify-center">
-                    <span className="text-3xl sm:text-5xl md:text-6xl font-black text-white tabular-nums drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]">
-                        {value}
-                    </span>
-                </div>
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-[#b388ff] mt-2 uppercase tracking-wider">
-                {label}
-            </span>
-        </div>
-    );
-
     return (
-        <div className="flex flex-col items-center justify-center font-poppins z-20 w-full max-w-5xl">
-
-            {/* Massive Days Counter */}
-            <div className="mb-8 sm:mb-12 flex flex-col items-center relative">
-                <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="relative"
-                >
+        <div className="flex items-center justify-center font-poppins z-20">
+            <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-center gap-4 sm:gap-8 md:gap-12"
+            >
+                {/* Days - Large number on left */}
+                <div className="flex flex-col items-left">
                     <span
-                        className={`text-[6rem] sm:text-[8rem] md:text-[12rem] leading-none font-black text-white tracking-tighter transition-all duration-100 ${isScrambling ? 'blur-[1px] opacity-80' : 'blur-0 opacity-100 drop-shadow-[0_0_30px_rgba(139,92,246,0.6)]'
+                        className={`text-[5rem] sm:text-[7rem] md:text-[10rem] lg:text-[12rem] leading-none font-fugaz text-white tracking-tight transition-all duration-100 ${isScrambling ? 'blur-[1px] opacity-80' : 'blur-0 opacity-100'
                             }`}
+                        style={{ fontFamily: 'Arial Black, sans-serif' }}
                     >
                         {timeLeft.days}
                     </span>
-                    <div className="absolute -bottom-2 md:bottom-2 right-0 bg-[#b388ff] text-[#130722] text-xs sm:text-base font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded shadow-lg transform rotate-[-5deg]">
-                        DAYS TO GO
+                    <span className="text-[#B080CA] text-xl text-left px-4 font-fugaz sm:text-2xl md:text-6xl font-medium tracking-wide">
+                        Days
+                    </span>
+                </div>
+
+                {/* Hours, Minutes, Seconds - Stacked on right */}
+                <div className="flex flex-col gap-1 sm:gap-2">
+                    {/* Hours */}
+                    <div className="flex items-baseline gap-2">
+                        <span
+                            className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white font-fugaz transition-all duration-100 ${isScrambling ? 'blur-[0.5px] opacity-80' : 'blur-0 opacity-100'
+                                }`}
+                            style={{ fontFamily: 'Arial Black, sans-serif' }}
+                        >
+                            {timeLeft.hours}
+                        </span>
+                        <span className="text-[#B080CA] font-fugaz text-lg sm:text-xl md:text-3xl lg:text-4xl font-medium">
+                            Hours
+                        </span>
                     </div>
-                </motion.div>
-            </div>
 
-            {/* Hours, Minutes, Seconds */}
-            <div className="flex justify-center items-center divide-x-2 divide-[#b388ff]/20">
-                <TimeUnit value={timeLeft.hours} label="Hours" />
-                <TimeUnit value={timeLeft.minutes} label="Minutes" />
-                <TimeUnit value={timeLeft.seconds} label="Seconds" />
-            </div>
+                    {/* Minutes */}
+                    <div className="flex items-baseline gap-2">
+                        <span
+                            className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white italic transition-all duration-100 ${isScrambling ? 'blur-[0.5px] opacity-80' : 'blur-0 opacity-100'
+                                }`}
+                            style={{ fontFamily: 'Arial Black, sans-serif' }}
+                        >
+                            {timeLeft.minutes}
+                        </span>
+                        <span className="text-[#B080CA] font-fugaz text-lg sm:text-xl md:text-3xl lg:text-4xl font-medium">
+                            Minutes
+                        </span>
+                    </div>
 
-            {/* Teaser Text */}
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={!isScrambling ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-                className="mt-12 text-center"
-            >
-                <p className="text-white/60 text-sm sm:text-lg tracking-[0.2em] font-light uppercase">
-                    February 26-28, 2026 • VIT Bhopal University
-                </p>
+                    {/* Seconds */}
+                    <div className="flex items-baseline gap-2">
+                        <span
+                            className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white italic transition-all duration-100 ${isScrambling ? 'blur-[0.5px] opacity-80' : 'blur-0 opacity-100'
+                                }`}
+                            style={{ fontFamily: 'Arial Black, sans-serif' }}
+                        >
+                            {timeLeft.seconds}
+                        </span>
+                        <span className="text-[#B080CA] font-fugaz text-lg sm:text-xl md:text-3xl lg:text-4xl font-medium">
+                            Seconds
+                        </span>
+                    </div>
+                </div>
             </motion.div>
         </div>
     );
@@ -165,19 +152,20 @@ const PreLoader = ({ show = true }) => {
                     animate={{ opacity: 1 }}
                     exit={{
                         opacity: 0,
-                        scale: 1.5,
+                        scale: 1.1,
                         filter: "blur(20px)",
-                        transition: { duration: 1.2, ease: [0.43, 0.13, 0.23, 0.96] }
+                        transition: { duration: 0.8, ease: [0.43, 0.13, 0.23, 0.96] }
                     }}
-                    className="fixed inset-0 w-full h-screen bg-[#130722] z-[9999] flex flex-col items-center justify-center overflow-hidden"
+                    className="fixed inset-0 w-full h-screen bg-[#12001A] z-[9999] flex flex-col items-center justify-center overflow-hidden"
                 >
-                    {/* Background Vector - Simplified Pattern */}
-                    <div className="absolute inset-0 z-0 opacity-10 md:opacity-20 pointer-events-none mix-blend-screen">
-                        <BgVector />
+                    {/* Background Vector Image */}
+                    <div className="absolute inset-0 z-0 pointer-events-none">
+                        <img
+                            src="/HomePage/TitleVector.png"
+                            alt=""
+                            className="w-full h-full object-cover opacity-40"
+                        />
                     </div>
-
-                    {/* Glowing Orb Background Effect */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-900/30 rounded-full blur-[100px] z-0 pointer-events-none"></div>
 
                     {/* Main Content */}
                     <div className="relative z-10 w-full flex flex-col items-center justify-center p-4">

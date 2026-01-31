@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useUI } from '@/contexts/UIContext';
 import LoginForm from './LoginForm';
+import NavButton from './Home/NavButton';
 
 function Header() {
     const [scrolled, setScrolled] = useState(false);
@@ -43,7 +44,7 @@ function Header() {
                 animate={{ y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
                 className={`fixed w-full py-2 z-50 transition-all duration-300 ${scrolled && !isOpen
-                    ? 'bg-[#0F041C]/70 backdrop-blur-md shadow-lg border-b border-white/10'
+                    ? 'border-white/20'
                     : 'bg-transparent'
                     }`}
             >
@@ -56,23 +57,24 @@ function Header() {
                         >
                             <Link to="/" className="flex items-center gap-3">
                                 <img
-                                    src="/Logo_VITBhopal.svg"
+                                    src="Images/VITB_Logo.png"
                                     alt="VIT Bhopal"
-                                    className={`h-10 sm:h-12 w-auto transition-all duration-300 ${isOpen ? 'brightness-0 invert' : ''}`}
+                                    className={`w-auto transition-all duration-300 ${isOpen ? 'brightness-0 invert h-10 sm:h-10' : 'h-10 sm:h-7 mt-8'}`}
                                 />
                             </Link>
                         </motion.div>
-
-                        {/* Right Side Buttons */}
                         <div className="flex items-center gap-4 relative z-50">
                             {isOpen && (
-                                <Link
-                                    to="/register"
-                                    className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-[#CDB7D9] text-[#280338] font-semibold hover:opacity-90 transition-opacity"
-                                >
-                                    <img src="/Register.svg" alt="Register" className="w-5 h-5" />
-                                    <span>REGISTER</span>
-                                </Link>
+                                <NavButton>
+                                    <Link
+                                        to="/register"
+                                        className="hidden sm:flex items-center gap-2 px-1 py-1 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
+                                    >
+                                        <img src="/Images/Register.svg" alt="Register" className="w-5 h-5 brightness-0 invert" />
+                                        <span>REGISTER</span>
+                                    </Link>
+                                </NavButton>
+
                             )}
                             {/* Close/Hamburger Button */}
                             <motion.button
@@ -84,19 +86,14 @@ function Header() {
                                 <div
                                     className={`absolute h-[3px] rounded-full transition-all duration-300 transform ${isOpen
                                         ? 'w-6 sm:w-8 rotate-45 bg-white'
-                                        : 'w-6 sm:w-8 -translate-y-2 bg-[#470067]'
+                                        : 'w-6 sm:w-4 -translate-y-2 translate-x-1 sm:translate-x-2 bg-white group-hover:w-8 group-hover:translate-x-0'
                                         }`}
                                 />
-                                <div
-                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform ${isOpen
-                                        ? 'opacity-0'
-                                        : 'w-6 sm:w-8 bg-[#470067]'
-                                        }`}
-                                />
+
                                 <div
                                     className={`absolute h-[3px] rounded-full transition-all duration-300 transform ${isOpen
                                         ? 'w-6 sm:w-8 -rotate-45 bg-white'
-                                        : 'w-4 translate-y-2 translate-x-1 sm:translate-x-2 bg-[#470067] group-hover:w-8 group-hover:translate-x-0'
+                                        : 'w-6 sm:w-8 bg-white'
                                         }`}
                                 />
                             </motion.button>
@@ -112,7 +109,7 @@ function Header() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 bg-[#0F041C] z-40 flex overflow-hidden"
+                        className="fixed inset-0 bg-[#00000095] backdrop-blur-2xl z-40 flex overflow-hidden"
                     >
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -121,14 +118,14 @@ function Header() {
                             className="absolute inset-0 flex z-0"
                         >
                             <img
-                                src="/Herosection_BG.svg"
+                                src="/Images/Herosection_BG.svg"
                                 alt="Background Left"
-                                className="w-full sm:w-1/2 opacity-30 h-full object-cover"
+                                className="w-full sm:w-1/2 grayscale opacity-30 h-full object-cover"
                             />
                             <img
-                                src="/Herosection_BG.svg"
+                                src="/Images/Herosection_BG.svg"
                                 alt="Background Right"
-                                className="hidden sm:block opacity-30 w-1/2 h-full object-cover"
+                                className="hidden sm:block grayscale opacity-30 w-1/2 h-full object-cover"
                             />
                         </motion.div>
 
@@ -151,7 +148,7 @@ function Header() {
                                                 transition={{ delay: 0.2 }}
                                                 className="w-full aspect-1"
                                             >
-                                                <img src="/Image1.svg" alt="Gallery 1" className="w-full h-full object-cover rounded-2xl" />
+                                                <img src="/Images/Image1.svg" alt="Gallery 1" className="w-full h-full object-cover rounded-2xl" />
                                             </motion.div>
                                             <motion.div
                                                 initial={{ opacity: 0, y: 50 }}
@@ -159,7 +156,7 @@ function Header() {
                                                 transition={{ delay: 0.3 }}
                                                 className="w-full aspect-[3/4]"
                                             >
-                                                <img src="/Image3.svg" alt="Gallery 3" className="w-full h-full object-cover rounded-2xl" />
+                                                <img src="/Images/Image3.svg" alt="Gallery 3" className="w-full h-full object-cover rounded-2xl" />
                                             </motion.div>
                                         </div>
 
@@ -171,7 +168,7 @@ function Header() {
                                                 transition={{ delay: 0.4 }}
                                                 className="w-full aspect-1"
                                             >
-                                                <img src="/Image2.svg" alt="Gallery 2" className="w-full h-full object-cover rounded-2xl" />
+                                                <img src="/Images/Image2.svg" alt="Gallery 2" className="w-full h-full object-cover rounded-2xl" />
                                             </motion.div>
                                             <motion.div
                                                 initial={{ opacity: 0, y: 50 }}
@@ -179,7 +176,7 @@ function Header() {
                                                 transition={{ delay: 0.5 }}
                                                 className="w-full aspect-1"
                                             >
-                                                <img src="/Image1.svg" alt="Gallery 4" className="w-full h-full object-cover rounded-2xl" />
+                                                <img src="/Images/Image1.svg" alt="Gallery 4" className="w-full h-full object-cover rounded-2xl" />
                                             </motion.div>
                                         </div>
                                     </div>
@@ -188,21 +185,20 @@ function Header() {
                                 {/* Right Side - Menu */}
                                 <div className="w-full lg:w-1/2 h-full flex flex-col justify-center items-center px-8 sm:px-16 md:px-24 pt-32 relative z-10 transition-all">
                                     {/* Centered Content Container */}
-                                    <div className="flex flex-col pt-20 pb-10 items-start justify-center w-full h-full pl-8 sm:pl-0">
-                                        <div className="flex flex-col items-start justify-between w-full h-full">
-                                            <div className="flex flex-col items-start gap-8 sm:gap-6 mb-12 w-full">
+                                    <div className="flex flex-col pt-20 pb-10 items-center justify-center w-full h-full">
+                                        <div className="flex flex-col items-center justify-between w-full h-full">
+                                            <div className="flex flex-col items-center gap-8 sm:gap-6 mb-12">
                                                 {navItems.map((item, index) => (
                                                     <motion.div
                                                         key={item.path}
                                                         initial={{ opacity: 0, x: 50 }}
                                                         animate={{ opacity: 1, x: 0 }}
                                                         transition={{ delay: 0.1 + index * 0.1 }}
-                                                        className="w-full text-left"
                                                     >
                                                         <Link
                                                             to={item.path}
                                                             onClick={() => setIsOpen(false)}
-                                                            className={`text-4xl sm:text-5xl lg:text-7xl font-bold text-[#CDB7D9] transition-all duration-300 uppercase block hover:text-white hover:tracking-wide ${location.pathname === item.path ? 'opacity-100' : 'opacity-50 hover:opacity-100'}`}
+                                                            className={`text-4xl sm:text-5xl font-semibold text-white transition-opacity uppercase text-center block ${location.pathname === item.path ? 'opacity-100' : 'opacity-50 hover:opacity-70'}`}
                                                         >
                                                             {item.name}
                                                         </Link>
@@ -214,7 +210,7 @@ function Header() {
                                                         to="#"
                                                         className="flex sm:hidden block items-center gap-2 px-4 py-2 rounded-lg bg-[#CDB7D9] text-[#280338] font-semibold hover:opacity-90 transition-opacity"
                                                     >
-                                                        <img src="/Register.svg" alt="Register" className="w-5 h-5" />
+                                                        <img src="/Images/Register.svg" alt="Register" className="w-5 h-5" />
                                                         <span>REGISTER</span>
                                                     </Link>
                                                 )}
@@ -226,19 +222,19 @@ function Header() {
                                                 transition={{ delay: 0.6 }}
                                                 className="hidden sm:flex flex-col items-center gap-4 mt-8"
                                             >
-                                                <a href="mailto:advitya@vitbhopal.ac.in" className="text-[#CDB7D9] hover:text-white transition-colors text-sm tracking-wider uppercase font-semibold">Email Us</a>
+                                                <a href="mailto:advitya@vitbhopal.ac.in" className="text-white hover:text-white transition-colors text-sm tracking-wider uppercase font-semibold">Email Us</a>
 
                                                 <div className="flex items-center gap-3 mt-2">
-                                                    <a href="https://www.youtube.com/@VITBHOPALOfficial" className="text-[#CDB7D9] hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
+                                                    <a href="https://www.youtube.com/@VITBHOPALOfficial" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
                                                         YOUTUBE
                                                     </a>
-                                                    <a href="https://www.instagram.com/vit.bhopal/?hl=en" className="text-[#CDB7D9] hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.instagram.com/vit.bhopal/?hl=en" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
                                                         INSTAGRAM
                                                     </a>
-                                                    <a href="https://www.linkedin.com/school/vit-bhopal-university/posts/?feedView=all" className="text-[#CDB7D9] hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.linkedin.com/school/vit-bhopal-university/posts/?feedView=all" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
                                                         LINKEDIN
                                                     </a>
-                                                    <a href="https://www.facebook.com/VITUnivBhopal/" className="text-[#CDB7D9] hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.facebook.com/VITUnivBhopal/" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
                                                         FACEBOOK
                                                     </a>
                                                 </div>

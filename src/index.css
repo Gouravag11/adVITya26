@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fugaz+One&display=swap');
 @import "tailwindcss";
 @import 'swiper/css';
 @import 'swiper/css/navigation';
@@ -22,6 +23,10 @@
 }
 
 @layer utilities {
+   .font-fugaz {
+      font-family: 'Fugaz One', cursive !important;
+   }
+
    .font-poppins {
       font-family: 'Poppins', sans-serif;
    }
@@ -104,11 +109,362 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
    ============================================ */
 /* Add Home page specific custom styles here */
 
+.record-player {
+   position: relative;
+   width: 528px;
+   height: 412px;
+}
+
+.player-shadow {
+   position: absolute;
+   width: 513px;
+   height: 345px;
+   background: transparent;
+   border-radius: 48px;
+   top: 49.27%;
+   left: 49.05%;
+   transform: translate(-50%, -50%);
+   box-shadow: none;
+}
+
+.player-body {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   background: #2a1f33;
+   border-radius: 36px;
+   padding: 4px;
+}
+
+.player-surface {
+   width: 520px;
+   height: 350px;
+   background: #c9bdd4;
+   border-radius: 32px;
+   position: relative;
+   overflow: hidden;
+   box-shadow:
+      inset -1px 1px 1px rgba(255, 255, 255, 0.25),
+      inset 1px -1px 1px rgba(0, 0, 0, 0.15);
+}
+
+/* Voltage selector */
+.voltage-selector {
+   position: absolute;
+   top: 35px;
+   right: 142px;
+   width: 43px;
+   height: 28px;
+}
+
+.voltage-text {
+   position: absolute;
+   bottom: 0;
+   left: 1px;
+   font-size: 5px;
+   font-weight: 1000;
+   text-align: right;
+   line-height: 8px;
+   color: #262626;
+}
+
+.voltage-indicator {
+   position: absolute;
+   top: 11px;
+   left: 7px;
+   width: 8px;
+   height: 1px;
+   background: #262626;
+}
+
+.voltage-knob {
+   position: absolute;
+   bottom: 1px;
+   left: 20px;
+   width: 22px;
+   height: 22px;
+   border-radius: 50%;
+   border: 1px solid #262626;
+}
+
+.voltage-knob-dot {
+   position: absolute;
+   top: 50%;
+   left: 2px;
+   width: 2px;
+   height: 2px;
+   background: #262626;
+   border-radius: 50%;
+   transform: translateY(-50%);
+}
+
+/* Vinyl Record */
+.vinyl-container {
+   position: absolute;
+   width: 622px;
+   height: 622px;
+   top: 50%;
+   left: 88px;
+   transform: translateY(-50%);
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.vinyl-record {
+   width: 190px;
+   height: 190px;
+   position: relative;
+}
+
+.vinyl-disc {
+   width: 70%;
+   height: 70%;
+   border-radius: 50%;
+   background: #000;
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   box-shadow: none;
+   overflow: hidden;
+}
+
+.vinyl-disc.spinning {
+   animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+   from {
+      transform: translate(-50%, -50%) rotate(0deg);
+   }
+
+   to {
+      transform: translate(-50%, -50%) rotate(360deg);
+   }
+}
+
+/* Grooves */
+.groove {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   border-radius: 50%;
+   border: 1px solid rgba(255, 255, 255, 0.11);
+}
+
+/* Label */
+.vinyl-label {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 35%;
+   height: 35%;
+   border-radius: 50%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   overflow: hidden;
+}
+
+.vinyl-label img {
+   width: 100%;
+   height: 100%;
+   object-fit: cover;
+}
+
+/* Center spindle */
+.center-ring {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 190px;
+   height: 190px;
+   background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 190"><path d="M 95 0 C 147.467 0 190 42.533 190 95 C 190 147.467 147.467 190 95 190 C 42.533 190 0 147.467 0 95 C 0 42.533 42.533 0 95 0 Z M 24 95 C 24 134.212 55.788 166 95 166 C 134.212 166 166 134.212 166 95 C 166 55.788 134.212 24 95 24 C 55.788 24 24 55.788 24 95 Z" fill="rgb(0, 0, 0)"/></svg>') no-repeat center;
+   background-size: 100%;
+}
+
+.center-piece {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   background: rgba(8, 8, 8, 0.1);
+   border-radius: 50%;
+   width: 41px;
+   height: 41px;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+}
+
+.center-dot {
+   width: 10px;
+   height: 10px;
+   border-radius: 50%;
+   background: #030303;
+   padding: 0.5px;
+}
+
+.center-dot-inner {
+   width: 100%;
+   height: 100%;
+   border-radius: 50%;
+   background: linear-gradient(135deg, rgba(0, 0, 0, 0.38), rgba(255, 255, 255, 0.2));
+   box-shadow:
+      -2.52px 0 1.51px -.28px rgba(0, 0, 0, 0.38),
+      -5.97px 0 3.58px -.56px rgba(0, 0, 0, 0.39);
+}
+
+/* Tonearm */
+.tonearm {
+   position: absolute;
+   top: 78px;
+   right: 21px;
+   width: 24px;
+   height: 200px;
+   transform-origin: left top;
+   transform: translate(-20px, 80px) rotate(-22deg);
+   transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+   z-index: 10;
+   cursor: grab;
+   user-select: none;
+}
+
+.tonearm.playing {
+   transform: translate(-20px, 80px) rotate(0deg);
+}
+
+.tonearm:active {
+   cursor: grabbing;
+}
+
+.tonearm-shadow {
+   position: absolute;
+   width: 251px;
+   height: 384px;
+   filter: blur(16px);
+   opacity: 0.6;
+   pointer-events: none;
+}
+
+.tonearm-arm {
+   width: 100%;
+   height: 100%;
+   fill: #2d2d2d;
+}
+
+/* Ticker display */
+.ticker {
+   position: absolute;
+   bottom: 50px;
+   right: 12px;
+   width: 126px;
+   height: 25px;
+   border-radius: 24px;
+   background: #000;
+   overflow: hidden;
+   box-shadow:
+      inset 0 0 10px rgba(0, 0, 0, 0.65),
+      1px 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.ticker-content {
+   display: flex;
+   white-space: nowrap;
+   animation: scroll-ticker 10s linear infinite;
+   padding: 6px 8px;
+   font-family: 'Courier New', monospace;
+   font-size: 11px;
+   font-weight: 700;
+   color: #ebebeb;
+   letter-spacing: -0.01em;
+}
+
+.ticker.paused .ticker-content {
+   animation-play-state: paused;
+}
+
+@keyframes scroll-ticker {
+   0% {
+      transform: translateX(0);
+   }
+
+   100% {
+      transform: translateX(-50%);
+   }
+}
+
+/* Power button */
+.power-button {
+   position: absolute;
+   bottom: 63px;
+   left: 436px;
+   width: 24px;
+   height: 31px;
+   border-radius: 50%;
+   background: linear-gradient(135deg, rgba(227, 220, 220, 0.9), rgba(180, 180, 180, 0.8));
+   box-shadow:
+      -19.76px 13.18px 26.35px rgba(0, 0, 0, 0.25),
+      inset 5px 0 10px rgba(0, 0, 0, 0.25);
+   cursor: pointer;
+   transition: transform 0.1s;
+}
+
+.power-button:hover {
+   transform: scale(1.05);
+}
+
+.power-button:active {
+   transform: scale(0.95);
+}
+
+/* Shimmer effect */
+.shimmer {
+   position: absolute;
+   top: 50%;
+   left: -20px;
+   width: 407px;
+   height: 156px;
+   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+   filter: blur(30px);
+   mix-blend-mode: screen;
+   opacity: 0.1;
+   transform: translateY(-50%);
+   pointer-events: none;
+}
 
 /* ============================================
    EVENTS PAGE STYLES
    ============================================ */
 /* Add Events page specific custom styles here */
+.perspective-1000 {
+   perspective: 1000px;
+}
+
+.transform-style-3d {
+   transform-style: preserve-3d;
+}
+
+.translate-z-10 {
+   transform: translateZ(20px);
+}
+
+.translate-z-8 {
+   transform: translateZ(15px);
+}
+
+.translate-z-6 {
+   transform: translateZ(10px);
+}
+
+.translate-z-4 {
+   transform: translateZ(5px);
+}
 
 
 /* ============================================
@@ -141,6 +497,16 @@ input[type="time"]::-webkit-calendar-picker-indicator:hover {
    COMPONENT STYLES
    ============================================ */
 /* Add reusable component custom styles here */
+
+@keyframes spin {
+   from {
+      transform: rotate(0deg);
+   }
+
+   to {
+      transform: rotate(360deg);
+   }
+}
 
 
 /* ============================================
