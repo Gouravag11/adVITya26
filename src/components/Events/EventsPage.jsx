@@ -42,7 +42,7 @@ const HeaderSpacer = ({ onHeightChange }) => {
 /* -------------------------------------------------------------------------- */
 const EventCard = ({ event, onClick }) => {
     return (
-        <div className="bg-[#1A0B2E]/60 backdrop-blur-sm rounded-[1.5vw] md:rounded-[1.5vw] sm:rounded-[12px] overflow-hidden border border-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer group">
+        <div className="bg-[#1A0B2]/60 backdrop-blur-sm rounded-[1.5vw] md:rounded-[1.5vw] sm:rounded-[12px] overflow-hidden border border-white/10 hover:border-purple-500/30 transition-all duration-300 cursor-pointer group">
             {/* DESKTOP LAYOUT */}
             <div className="hidden md:block">
                 <div className="relative h-[12vw] overflow-hidden">
@@ -282,7 +282,7 @@ const EventsPage = () => {
             <HeaderSpacer onHeightChange={setTopOffset} />
 
             <main
-                className="min-h-screen bg-[#0F041C] text-white"
+                className="min-h-screen bg-[#12001A] text-white"
                 style={{ paddingTop: topOffset }}
             >
                 {/* Network Error Alert */}
@@ -305,7 +305,7 @@ const EventsPage = () => {
 
                 {/* Background Pattern */}
                 <div className="fixed inset-0 pointer-events-none z-0">
-                    <img src="/Herosection_BG.svg" alt="" className="w-full h-full object-cover opacity-20" />
+                    <img src="/Images/Herosection_BG.svg" alt="" className="w-full h-full object-cover opacity-20" />
                 </div>
 
                 {/* MOBILE LAYOUT */}

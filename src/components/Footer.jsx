@@ -52,16 +52,16 @@ function Footer() {
                 Events
               </Link>
               <Link
-                to="/sponsors"
+                to="/sportfest"
                 className="text-[#6B5B7A] text-xl md:text-2xl font-bold tracking-wide hover:text-[#CDB7D9] transition-colors uppercase"
               >
-                Sponsors
+                Sports Fest
               </Link>
               <Link
-                to="/about"
+                to="/sponsor"
                 className="text-[#6B5B7A] text-xl md:text-2xl font-bold tracking-wide hover:text-[#CDB7D9] transition-colors uppercase"
               >
-                About Us
+                Sponsor Us
               </Link>
               <Link
                 to="/team"

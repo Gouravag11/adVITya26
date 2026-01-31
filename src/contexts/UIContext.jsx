@@ -5,6 +5,7 @@ const UIContext = createContext();
 export function UIProvider({ children }) {
     const [isHeaderOpen, setIsHeaderOpen] = useState(false);
     const [headerMode, setHeaderMode] = useState('nav');
+    const [headerVisible, setHeaderVisible] = useState(false);
 
     const openHeader = (mode = 'nav') => {
         setHeaderMode(mode);
@@ -24,13 +25,19 @@ export function UIProvider({ children }) {
         }
     };
 
+    const showHeader = () => setHeaderVisible(true);
+    const hideHeader = () => setHeaderVisible(false);
+
     const value = {
         isHeaderOpen,
         headerMode,
         setHeaderMode,
         openHeader,
         closeHeader,
-        toggleHeader
+        toggleHeader,
+        headerVisible,
+        showHeader,
+        hideHeader
     };
 
     return (
