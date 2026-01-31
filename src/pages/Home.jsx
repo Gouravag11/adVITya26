@@ -17,6 +17,7 @@ import VolumeControl from '../components/Home/VolumeControl';
 import EventsSection from '../components/Home/EventsSection';
 import { Activity } from 'lucide-react';
 import PreLoader from "../components/PreLoader";
+import { useUI } from '../contexts/UIContext';
 gsap.registerPlugin(ScrollTrigger);
 
 
@@ -88,6 +89,7 @@ const floatAnimation = {
 
 
 export default function Home() {
+  const { showHeader, hideHeader } = useUI();
 
   const [showPreLoader, setShowPreLoader] = useState(true);
   const [isPlaying, setIsPlaying] = React.useState(false);
@@ -280,6 +282,24 @@ export default function Home() {
     });
   }, { scope: pulseRef });
 
+  // Header visibility trigger - show when pulse section top hits viewport top
+  useGSAP(() => {
+    if (!pulseRef.current) return;
+
+    ScrollTrigger.create({
+      trigger: pulseRef.current,
+      start: "top top",
+      end: "bottom top",
+      onEnter: () => showHeader(),
+      onLeaveBack: () => hideHeader()
+    });
+
+    // Cleanup on unmount
+    return () => {
+      hideHeader();
+    };
+  }, { scope: pulseRef, dependencies: [showHeader, hideHeader] });
+
   return (
     <>
 
@@ -371,9 +391,9 @@ export default function Home() {
                   <div className='hidden lg:flex w-96 h-full z-10 flex-col'>
                     <div className='w-full h-full max-h-[70%] flex py-6 px-4 flex-col relative'>
                       <motion.div variants={itemVariants} className='flex gap-4 text-white font-medium'>
-                        <NavButton>Events</NavButton>
-                        <NavButton>Sports</NavButton>
-                        <NavButton>Sponsor US</NavButton>
+                        <NavButton to="/events">Events</NavButton>
+                        <NavButton to="/sportfest">Sports</NavButton>
+                        <NavButton to="/sponsor">Sponsor US</NavButton>
                       </motion.div>
 
                       <motion.div
@@ -460,8 +480,8 @@ export default function Home() {
 
         <div ref={wrapperRef} className="w-screen relative min-h-[300vh] pointer-events-none z-10" />
 
-        <div ref={titleRef} className="min-h-[60vh] lg:h-screen bg-[#12001A] relative z-20 flex items-center overflow-hidden">
-          <img src="/HomePage/TitleVector.png" alt="Title Vector" className="w-full h-full absolute top-0" />
+        <div ref={titleRef} className="min-h-screen lg:h-screen bg-[#12001A] relative z-20 flex items-center overflow-hidden">
+          <img src="/HomePage/TitleVector.png" alt="Title Vector" className="object-cover w-full h-full absolute top-0" />
           <div ref={scrollTextRef} className="flex gap-8 sm:gap-12 lg:gap-20 items-center whitespace-nowrap relative">
             <img src="/HomePage/TitleStar.svg" alt="Star" className='w-12 sm:w-16 lg:w-24 absolute -left-8 sm:-left-12 lg:-left-16 -top-10 sm:-top-14 lg:-top-18 hidden sm:block' />
             <img src="/HomePage/TitleStar2.svg" alt="Star" className='w-24 sm:w-40 lg:w-56 absolute left-1/2 -translate-x-1.2 top-20 sm:top-32 lg:top-40 hidden sm:block' />
@@ -525,7 +545,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 2, duration: 1 }}
-            className="absolute bottom-10 right-10 md:bottom-20 md:right-20 z-50 mix-blend-difference"
+            className="hidden sm:block absolute bottom-10 right-10 md:bottom-20 md:right-20 z-50 mix-blend-difference"
           >
             <div className="w-[26px] h-[44px] border-2 border-white rounded-full flex justify-center pt-2 opacity-80">
               <motion.div
@@ -560,15 +580,39 @@ export default function Home() {
                   key={item.id}
                   className="pulse-item group relative border-b border-white/10 py-8 cursor-pointer transition-all duration-300"
                   onMouseEnter={() => setActiveItem(item)}
+                  onClick={() => setActiveItem(item)}
                 >
                   <div className="flex gap-6 md:gap-10 items-start max-w-full lg:max-w-[60%]">
                     <span className={`text-4xl md:text-5xl font-bold transition-colors duration-300 ${activeItem.id === item.id ? 'text-[#EFD2FF] opacity-100' : 'text-white/30 group-hover:text-white/60'}`}>
                       {item.id}
                     </span>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-2 w-full">
                       <h3 className={`text-2xl md:text-3xl font-bold transition-all duration-300 ${activeItem.id === item.id ? 'text-[#EFD2FF]' : 'text-[#EFD2FF] group-hover:text-[#EFD2FF]'}`}>
                         {item.title}
                       </h3>
+
+                      {/* Mobile Image - Visible only when active on mobile/tablet */}
+                      <AnimatePresence>
+                        {activeItem.id === item.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3, ease: "easeInOut" }}
+                            className="lg:hidden w-full overflow-hidden"
+                          >
+                            <div className="aspect-video rounded-xl overflow-hidden my-4 bg-[#1a0a24]">
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
                       <p className="text-[#EFD2FF]/60 text-sm md:text-base leading-relaxed max-w-xl">
                         {item.description}
                       </p>
@@ -589,7 +633,7 @@ export default function Home() {
             {/* Sticky Image/Preview Card Container - Hidden on mobile */}
             <div className="hidden lg:block w-full lg:w-2/5 lg:absolute lg:top-0 lg:right-0 lg:h-full z-20 pointer-events-none">
               <div className="sticky top-20 w-full h-[500px] flex items-center justify-center pointer-events-auto">
-                <div className="w-full max-w-sm aspect-[4/5] rounded-3xl shadow-2xl relative overflow-hidden">
+                <div className="w-full max-w-sm aspect-[4/5] rounded-3xl shadow-2xl relative overflow-hidden bg-[#1a0a24]">
                   {/* All images preloaded and stacked - only active one visible */}
                   {items.map((item) => (
                     <div
@@ -601,6 +645,7 @@ export default function Home() {
                         src={item.image}
                         alt={item.title}
                         className="w-full h-full object-cover"
+                        loading="eager"
                       />
                     </div>
                   ))}

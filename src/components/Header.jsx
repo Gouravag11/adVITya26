@@ -43,38 +43,25 @@ function Header() {
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 transition={{ duration: 0.5, ease: 'easeOut' }}
-                className={`fixed w-full py-2 z-50 transition-all duration-300 ${scrolled && !isOpen
+                className={`fixed w-full z-50 transition-all duration-300 ${scrolled && !isOpen
                     ? 'border-white/20'
                     : 'bg-transparent'
                     }`}
             >
-                <nav className="mx-auto px-8 sm:px-10 md:px-20 py-6">
-                    <div className="flex items-center justify-between">
-                        <motion.div
-                            whileHover={{ scale: 1.05 }}
-                            transition={{ duration: 0.2 }}
-                            className="relative z-50"
-                        >
-                            <Link to="/" className="flex items-center gap-3">
-                                <img
-                                    src="Images/VITB_Logo.png"
-                                    alt="VIT Bhopal"
-                                    className={`w-auto transition-all duration-300 ${isOpen ? 'brightness-0 invert h-10 sm:h-10' : 'h-10 sm:h-7 mt-8'}`}
-                                />
-                            </Link>
-                        </motion.div>
-                        <div className="flex items-center gap-4 relative z-50">
-                            {isOpen && (
-                                <NavButton>
+                <nav className="mx-auto">
+                    <div className='w-full h-4 bg-[#CDB7D9]'></div>
+                    <div className="flex justify-end items-center">
+                        <div className="flex items-center bg-[#CDB7D9] px-4 py-2 rounded-b-xl -top-1 gap-4 relative z-50">
+                            {!location.pathname.startsWith('/events') && (
+                                <div className='hidden sm:block bg-[#280338] px-4 py-2 rounded-xl'>
                                     <Link
-                                        to="/register"
-                                        className="hidden sm:flex items-center gap-2 px-1 py-1 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
+                                        to="/events"
+                                        className="flex items-center gap-2 px-1 py-1 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
                                     >
                                         <img src="/Images/Register.svg" alt="Register" className="w-5 h-5 brightness-0 invert" />
                                         <span>REGISTER</span>
                                     </Link>
-                                </NavButton>
-
+                                </div>
                             )}
                             {/* Close/Hamburger Button */}
                             <motion.button
@@ -84,16 +71,21 @@ function Header() {
                                 whileTap={{ scale: 0.95 }}
                             >
                                 <div
-                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform ${isOpen
-                                        ? 'w-6 sm:w-8 rotate-45 bg-white'
-                                        : 'w-6 sm:w-4 -translate-y-2 translate-x-1 sm:translate-x-2 bg-white group-hover:w-8 group-hover:translate-x-0'
+                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform bg-[#470067] ${isOpen
+                                        ? 'w-6 sm:w-8 rotate-45'
+                                        : 'w-6 sm:w-8 -translate-y-2 '
                                         }`}
                                 />
-
                                 <div
-                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform ${isOpen
-                                        ? 'w-6 sm:w-8 -rotate-45 bg-white'
-                                        : 'w-6 sm:w-8 bg-white'
+                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform bg-[#470067] ${isOpen
+                                        ? 'opacity-0'
+                                        : 'w-6 sm:w-8'
+                                        }`}
+                                />
+                                <div
+                                    className={`absolute h-[3px] rounded-full transition-all duration-300 transform bg-[#470067] ${isOpen
+                                        ? 'w-6 sm:w-8 -rotate-45'
+                                        : 'w-4 translate-y-2 translate-x-1 sm:translate-x-2 group-hover:w-8 group-hover:translate-x-0'
                                         }`}
                                 />
                             </motion.button>
@@ -109,7 +101,7 @@ function Header() {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="fixed inset-0 bg-[#00000095] backdrop-blur-2xl z-40 flex overflow-hidden"
+                        className="fixed inset-0 bg-[#12001A]/90 backdrop-blur-2xl z-40 flex overflow-hidden"
                     >
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -207,7 +199,7 @@ function Header() {
 
                                                 {isOpen && (
                                                     <Link
-                                                        to="#"
+                                                        to="/events"
                                                         className="flex sm:hidden block items-center gap-2 px-4 py-2 rounded-lg bg-[#CDB7D9] text-[#280338] font-semibold hover:opacity-90 transition-opacity"
                                                     >
                                                         <img src="/Images/Register.svg" alt="Register" className="w-5 h-5" />
@@ -228,13 +220,13 @@ function Header() {
                                                     <a href="https://www.youtube.com/@VITBHOPALOfficial" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
                                                         YOUTUBE
                                                     </a>
-                                                    <a href="https://www.instagram.com/vit.bhopal/?hl=en" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.instagram.com/vit.bhopal/?hl=en" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
                                                         INSTAGRAM
                                                     </a>
-                                                    <a href="https://www.linkedin.com/school/vit-bhopal-university/posts/?feedView=all" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.linkedin.com/school/vit-bhopal-university/posts/?feedView=all" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
                                                         LINKEDIN
                                                     </a>
-                                                    <a href="https://www.facebook.com/VITUnivBhopal/" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm">
+                                                    <a href="https://www.facebook.com/VITUnivBhopal/" className="text-white hover:text-white transition-colors uppercase tracking-widest font-medium text-sm" target="_blank" rel="noopener noreferrer">
                                                         FACEBOOK
                                                     </a>
                                                 </div>
