@@ -52,15 +52,17 @@ function Header() {
                     <div className='w-full h-4 bg-[#CDB7D9]'></div>
                     <div className="flex justify-end items-center">
                         <div className="flex items-center bg-[#CDB7D9] px-4 py-2 rounded-b-xl -top-1 gap-4 relative z-50">
-                            <div className='hidden sm:block bg-[#280338] px-4 py-2 rounded-xl'>
-                                <Link
-                                    to="/register"
-                                    className="flex items-center gap-2 px-1 py-1 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
-                                >
-                                    <img src="/Images/Register.svg" alt="Register" className="w-5 h-5 brightness-0 invert" />
-                                    <span>REGISTER</span>
-                                </Link>
-                            </div>
+                            {!location.pathname.startsWith('/events') && (
+                                <div className='hidden sm:block bg-[#280338] px-4 py-2 rounded-xl'>
+                                    <Link
+                                        to="/events"
+                                        className="flex items-center gap-2 px-1 py-1 rounded-lg text-white font-semibold hover:opacity-90 transition-opacity"
+                                    >
+                                        <img src="/Images/Register.svg" alt="Register" className="w-5 h-5 brightness-0 invert" />
+                                        <span>REGISTER</span>
+                                    </Link>
+                                </div>
+                            )}
                             {/* Close/Hamburger Button */}
                             <motion.button
                                 onClick={() => setIsOpen(!isOpen)}
@@ -197,7 +199,7 @@ function Header() {
 
                                                 {isOpen && (
                                                     <Link
-                                                        to="#"
+                                                        to="/events"
                                                         className="flex sm:hidden block items-center gap-2 px-4 py-2 rounded-lg bg-[#CDB7D9] text-[#280338] font-semibold hover:opacity-90 transition-opacity"
                                                     >
                                                         <img src="/Images/Register.svg" alt="Register" className="w-5 h-5" />
